@@ -1,60 +1,82 @@
-import { createContext, useContext, useMemo, useState } from 'react'
+import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { useLocalStorage } from '../hooks/useLocalStorage'
 import { differenceInCalendarDays, addDays, isAfter } from 'date-fns'
 import { DAILY_FINE } from '../utils/constants'
+import { listBooks, createBook as apiCreateBook, updateBookApi, deleteBookApi, listBorrows, createBorrow, updateBorrow, seedBooks } from '../services/mockApi'
 
 const LibraryContext = createContext(null)
 
 export function LibraryProvider({ children }) {
-  const [stored, setStored] = useLocalStorage('rl_library', {
-    books: [],
-    borrows: []
-  })
+  const [stored, setStored] = useLocalStorage('rl_library', { books: [], borrows: [] })
   const [books, setBooks] = useState(stored.books || [])
   const [borrows, setBorrows] = useState(stored.borrows || [])
 
-  const persist = (nextBooks, nextBorrows) => {
+  useEffect(() => {
+    const load = async () => {
+      try {
+        await seedBooks() // Seed books if API is empty
+        const [bks, brs] = await Promise.all([listBooks(), listBorrows()])
+        setBooks(Array.isArray(bks) ? bks : [])
+        setBorrows(Array.isArray(brs) ? brs : [])
+        setStored({ books: bks, borrows: brs })
+      } catch {
+        // fall back to stored if API fails
+      }
+    }
+    load()
+  }, [setStored])
+
+  const addBook = async book => {
+    const payload = { ...book, available: true }
+    const created = await apiCreateBook(payload)
+    const next = [...books, created]
+    setBooks(next)
+    setStored({ books: next, borrows })
+  }
+
+  const updateBook = async (id, updates) => {
+    const updated = await updateBookApi(id, updates)
+    const next = books.map(b => (b.id === id ? updated : b))
+    setBooks(next)
+    setStored({ books: next, borrows })
+  }
+
+  const deleteBook = async id => {
+    await deleteBookApi(id)
+    const nextBooks = books.filter(b => b.id !== id)
+    const nextBorrows = borrows.filter(br => br.bookId !== id)
     setBooks(nextBooks)
     setBorrows(nextBorrows)
     setStored({ books: nextBooks, borrows: nextBorrows })
   }
 
-  const addBook = book => {
-    const next = [...books, { ...book, id: crypto.randomUUID(), available: true }]
-    persist(next, borrows)
-  }
-
-  const updateBook = (id, updates) => {
-    const next = books.map(b => (b.id === id ? { ...b, ...updates } : b))
-    persist(next, borrows)
-  }
-
-  const deleteBook = id => {
-    const nextBooks = books.filter(b => b.id !== id)
-    const nextBorrows = borrows.filter(br => br.bookId !== id)
-    persist(nextBooks, nextBorrows)
-  }
-
-  const borrowBook = ({ bookId, userId, days = 14 }) => {
+  const borrowBook = async ({ bookId, userId, days = 14 }) => {
     const book = books.find(b => b.id === bookId)
     if (!book || !book.available) return { ok: false, error: 'Book not available' }
     const dueDate = addDays(new Date(), days).toISOString()
+    const createdBorrow = await createBorrow({ bookId, userId, borrowedAt: new Date().toISOString(), dueDate, returnedAt: null })
     const nextBooks = books.map(b => (b.id === bookId ? { ...b, available: false } : b))
-    const nextBorrows = [
-      ...borrows,
-      { id: crypto.randomUUID(), bookId, userId, borrowedAt: new Date().toISOString(), dueDate, returnedAt: null }
-    ]
-    persist(nextBooks, nextBorrows)
+    const nextBorrows = [...borrows, createdBorrow]
+    setBooks(nextBooks)
+    setBorrows(nextBorrows)
+    setStored({ books: nextBooks, borrows: nextBorrows })
+    await updateBookApi(bookId, { available: false })
     return { ok: true }
   }
 
-  const returnBook = ({ borrowId }) => {
+  const returnBook = async ({ borrowId }) => {
     const borrow = borrows.find(br => br.id === borrowId)
     if (!borrow || borrow.returnedAt) return { ok: false, error: 'Invalid borrow' }
     const returnedAt = new Date().toISOString()
     const nextBorrows = borrows.map(br => (br.id === borrowId ? { ...br, returnedAt } : br))
     const nextBooks = books.map(b => (b.id === borrow.bookId ? { ...b, available: true } : b))
-    persist(nextBooks, nextBorrows)
+    setBooks(nextBooks)
+    setBorrows(nextBorrows)
+    setStored({ books: nextBooks, borrows: nextBorrows })
+    await Promise.all([
+      updateBorrow(borrowId, { returnedAt }),
+      updateBookApi(borrow.bookId, { available: true })
+    ])
     return { ok: true }
   }
 
