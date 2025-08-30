@@ -1,6 +1,7 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { useLibrary } from '../contexts/LibraryContext'
+import { useLocation } from 'react-router-dom'
 import BookList from '../components/BookList'
 import BookForm from '../components/BookForm'
 import Dashboard from '../components/Dashboard'
@@ -9,12 +10,24 @@ import { formatDate } from '../utils/date'
 export default function LibrarianDashboard() {
   const { user } = useAuth()
   const { addBook, updateBook, deleteBook, books, borrows, calculateFine } = useLibrary()
+  const location = useLocation()
   const [editing, setEditing] = useState(null)
   const [showForm, setShowForm] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [filterCategory, setFilterCategory] = useState('')
   const [filterStatus, setFilterStatus] = useState('')
   const [activeTab, setActiveTab] = useState('overview')
+
+  // Handle URL parameters for tab navigation
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.search)
+    const tabParam = urlParams.get('tab')
+    console.log('URL search:', location.search, 'Tab param:', tabParam)
+    if (tabParam && ['overview', 'books', 'members', 'transactions', 'reports', 'notifications', 'profile'].includes(tabParam)) {
+      console.log('Setting active tab to:', tabParam)
+      setActiveTab(tabParam)
+    }
+  }, [location.search])
 
   // All hooks and calculations must be done before any conditional returns
   const overdueBorrows = useMemo(() => 
@@ -122,7 +135,7 @@ export default function LibrarianDashboard() {
       notifications.push({
         type: 'overdue',
         title: 'Overdue Books Alert',
-        message: `${overdueBorrows.length} book${overdueBorrows.length !== 1 ? 's' : ''} are overdue with total fines of $${overdueBorrows.reduce((sum, br) => sum + calculateFine(br), 0).toFixed(2)}`,
+        message: `${overdueBorrows.length} book${overdueBorrows.length !== 1 ? 's' : ''} are overdue with total fines of Rs. ${overdueBorrows.reduce((sum, br) => sum + calculateFine(br), 0).toFixed(2)}`,
         priority: 'high'
       })
     }
@@ -217,7 +230,7 @@ export default function LibrarianDashboard() {
         <div className="stat-card">
           <h3>Total Fines</h3>
           <div className="stat-number overdue">
-            ${overdueBorrows.reduce((sum, br) => sum + calculateFine(br), 0).toFixed(2)}
+            Rs. ${overdueBorrows.reduce((sum, br) => sum + calculateFine(br), 0).toFixed(2)}
           </div>
         </div>
         <div className="stat-card">
@@ -283,19 +296,21 @@ export default function LibrarianDashboard() {
     <div className="dashboard-section">
       <h3>📚 Books Management</h3>
       
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
           <input
             type="text"
-            placeholder="Search books..."
+            placeholder="Search books by title, author, or ISBN..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            style={{ padding: '8px 12px', borderRadius: '4px', border: '1px solid #ccc' }}
+            className="search-input"
+            style={{ minWidth: '300px' }}
           />
           <select
             value={filterCategory}
             onChange={(e) => setFilterCategory(e.target.value)}
-            style={{ padding: '8px 12px', borderRadius: '4px', border: '1px solid #ccc' }}
+            className="form-select"
+            style={{ minWidth: '150px' }}
           >
             <option value="">All Categories</option>
             {categories.map(cat => (
@@ -305,14 +320,16 @@ export default function LibrarianDashboard() {
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            style={{ padding: '8px 12px', borderRadius: '4px', border: '1px solid #ccc' }}
+            className="form-select"
+            style={{ minWidth: '120px' }}
           >
             <option value="">All Status</option>
             <option value="available">Available</option>
             <option value="borrowed">Borrowed</option>
           </select>
         </div>
-        <button onClick={() => setShowForm(s => !s)} className="btn btn-primary">
+        <button onClick={() => setShowForm(s => !s)} className="btn btn-primary btn-large">
+          <span style={{ fontSize: '1.2rem' }}>{showForm ? '✖️' : '➕'}</span>
           {showForm ? 'Close Form' : 'Add New Book'}
         </button>
       </div>
@@ -361,7 +378,7 @@ export default function LibrarianDashboard() {
             <div className="table-cell">Total Borrows</div>
             <div className="table-cell">Active</div>
             <div className="table-cell">Overdue</div>
-            <div className="table-cell">Fines</div>
+            <div className="table-cell">Fines (Rs.)</div>
             <div className="table-cell">Status</div>
           </div>
           {users.map(user => (
@@ -370,7 +387,7 @@ export default function LibrarianDashboard() {
               <div className="table-cell">{user.borrowCount}</div>
               <div className="table-cell">{user.activeBorrows}</div>
               <div className="table-cell">{user.overdueCount}</div>
-              <div className="table-cell">${user.totalFines.toFixed(2)}</div>
+              <div className="table-cell">Rs. ${user.totalFines.toFixed(2)}</div>
               <div className="table-cell">
                 <span className={`status-badge ${user.overdueCount > 0 ? 'overdue' : 'good'}`}>
                   {user.overdueCount > 0 ? 'Overdue' : 'Good'}
@@ -402,8 +419,8 @@ export default function LibrarianDashboard() {
             <span className="stat-value">{librarianStats.overdueCount}</span>
           </div>
           <div className="transaction-stat">
-            <span className="stat-label">Total Fines:</span>
-            <span className="stat-value">${librarianStats.totalFines.toFixed(2)}</span>
+            <span className="stat-label">Total Fines (Rs.):</span>
+            <span className="stat-value">Rs. ${librarianStats.totalFines.toFixed(2)}</span>
           </div>
         </div>
       </div>
@@ -438,7 +455,7 @@ export default function LibrarianDashboard() {
                     {borrow.status === 'borrowed' ? (isOverdue ? 'Overdue' : 'Active') : 'Returned'}
                   </span>
                   {isOverdue && (
-                    <div className="fine-amount">Fine: ${fine.toFixed(2)}</div>
+                    <div className="fine-amount">Fine: Rs. ${fine.toFixed(2)}</div>
                   )}
                 </div>
               </div>
@@ -491,16 +508,16 @@ export default function LibrarianDashboard() {
         </div>
 
         <div className="report-card">
-          <h4>💰 Financial Summary</h4>
+          <h4>💰 Financial Summary (in Rupees)</h4>
           <div className="report-content">
             <div className="financial-item">
-              <span className="financial-label">Total Fines Generated:</span>
-              <span className="financial-value">${librarianStats.totalFines.toFixed(2)}</span>
+              <span className="financial-label">Total Fines Generated (Rs.):</span>
+              <span className="financial-value">Rs. ${librarianStats.totalFines.toFixed(2)}</span>
             </div>
             <div className="financial-item">
-              <span className="financial-label">Average Fine:</span>
+              <span className="financial-label">Average Fine (Rs.):</span>
               <span className="financial-value">
-                ${overdueBorrows.length > 0 ? (librarianStats.totalFines / overdueBorrows.length).toFixed(2) : '0.00'}
+                Rs. ${overdueBorrows.length > 0 ? (librarianStats.totalFines / overdueBorrows.length).toFixed(2) : '0.00'}
               </span>
             </div>
             <div className="financial-item">
@@ -510,6 +527,42 @@ export default function LibrarianDashboard() {
           </div>
         </div>
       </div>
+
+      {/* Detailed Overdue Table */}
+      {overdueBorrows.length > 0 && (
+        <div className="report-card" style={{ marginTop: '20px' }}>
+          <h4>⚠️ Overdue Items Details</h4>
+          <div className="report-content">
+            <table width="100%" style={{ borderCollapse: 'collapse', marginTop: '10px' }}>
+              <thead>
+                <tr style={{ borderBottom: '2px solid var(--color-elev-2)' }}>
+                  <th style={{ textAlign: 'left', padding: '12px', fontWeight: 'bold' }}>Book</th>
+                  <th style={{ textAlign: 'left', padding: '12px', fontWeight: 'bold' }}>Borrower</th>
+                  <th style={{ textAlign: 'left', padding: '12px', fontWeight: 'bold' }}>Due Date</th>
+                  <th style={{ textAlign: 'left', padding: '12px', fontWeight: 'bold' }}>Days Overdue</th>
+                  <th style={{ textAlign: 'left', padding: '12px', fontWeight: 'bold' }}>Fine (Rs.)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {overdueBorrows.map(br => {
+                  const book = books.find(b => b.id === br.bookId)
+                  const dueDate = new Date(br.dueDate)
+                  const daysOverdue = Math.ceil((new Date() - dueDate) / (1000 * 60 * 60 * 24))
+                  return (
+                    <tr key={br.id} style={{ borderBottom: '1px solid var(--color-elev-1)' }}>
+                      <td style={{ padding: '12px' }}>{book?.title || 'Unknown'}</td>
+                      <td style={{ padding: '12px' }}>{br.userId}</td>
+                      <td style={{ padding: '12px' }}>{formatDate(br.dueDate)}</td>
+                      <td style={{ padding: '12px', color: 'var(--color-danger)', fontWeight: 'bold' }}>{daysOverdue} days</td>
+                      <td style={{ padding: '12px', color: 'var(--color-danger)', fontWeight: 'bold' }}>Rs. ${calculateFine(br).toFixed(2)}</td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   )
 

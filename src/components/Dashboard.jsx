@@ -3,7 +3,7 @@ import { useLibrary } from '../contexts/LibraryContext'
 import { formatDate } from '../utils/date'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, CartesianGrid, Legend } from 'recharts'
 
-const COLORS = ['#6366f1', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#84cc16', '#f97316']
+const COLORS = ['#1E3A8A', '#10B981', '#f59e0b', '#DC2626', '#3B82F6', '#8b5cf6', '#84cc16', '#f97316']
 
 export default function Dashboard() {
   const { books, borrows, calculateFine } = useLibrary()
@@ -126,8 +126,8 @@ export default function Dashboard() {
           <div className="stat-number overdue">{overdue.length}</div>
         </div>
         <div className="stat-card">
-          <h3>Total Fines</h3>
-          <div className="stat-number overdue">${totalFines.toFixed(2)}</div>
+          <h3>Total Fines (Rs.)</h3>
+          <div className="stat-number overdue">Rs. ${totalFines.toFixed(2)}</div>
         </div>
       </div>
 
@@ -147,7 +147,7 @@ export default function Dashboard() {
                   formatter={(value, name) => [value, 'Borrows']}
                   labelFormatter={(label) => `${label} (${topBooks.find(b => b.name === label)?.author})`}
                 />
-                <Bar dataKey="count" fill="#6366f1" />
+                <Bar dataKey="count" fill="var(--color-primary)" />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -166,7 +166,7 @@ export default function Dashboard() {
                   labelLine={false}
                   label={({ name, borrows }) => `${name}: ${borrows}`}
                   outerRadius={80}
-                  fill="#8884d8"
+                  fill="var(--color-primary-light)"
                   dataKey="borrows"
                 >
                   {categoryStats.slice(0, 8).map((entry, index) => (
@@ -189,7 +189,7 @@ export default function Dashboard() {
                 <XAxis dataKey="month" />
                 <YAxis />
                 <Tooltip formatter={(value, name) => [value, 'Overdue Items']} />
-                <Line type="monotone" dataKey="overdue" stroke="#ef4444" strokeWidth={2} />
+                <Line type="monotone" dataKey="overdue" stroke="var(--color-danger)" strokeWidth={2} />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -205,7 +205,7 @@ export default function Dashboard() {
                 <XAxis dataKey="month" />
                 <YAxis />
                 <Tooltip formatter={(value, name) => [value, 'Borrows']} />
-                <Line type="monotone" dataKey="borrows" stroke="#22c55e" strokeWidth={2} />
+                <Line type="monotone" dataKey="borrows" stroke="var(--color-success)" strokeWidth={2} />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -223,7 +223,7 @@ export default function Dashboard() {
                 <th>Borrower</th>
                 <th>Due Date</th>
                 <th>Days Overdue</th>
-                <th>Fine</th>
+                <th>Fine (Rs.)</th>
               </tr>
             </thead>
             <tbody>
@@ -237,7 +237,7 @@ export default function Dashboard() {
                     <td>{br.userId}</td>
                     <td>{formatDate(br.dueDate)}</td>
                     <td>{daysOverdue} days</td>
-                    <td>${calculateFine(br).toFixed(2)}</td>
+                    <td>Rs. ${calculateFine(br).toFixed(2)}</td>
                   </tr>
                 )
               })}

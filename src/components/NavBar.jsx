@@ -33,18 +33,10 @@ export default function NavBar() {
           {user && (
             <>
               {user.role === 'librarian' ? <AdminNav /> : <UserNav />}
-              <li style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: 'var(--space-2)',
-                padding: 'var(--space-2) var(--space-3)',
-                background: 'rgba(255, 255, 255, 0.05)',
-                borderRadius: 'var(--radius-md)',
-                border: '1px solid rgba(255, 255, 255, 0.1)'
-              }}>
+              <li className="nav-user-profile">
                 <span style={{ 
                   fontSize: '16px',
-                  color: user.role === 'librarian' ? 'var(--color-primary)' : 'var(--color-success)'
+                  color: '#FFFFFF'
                 }}>
                   {user.role === 'librarian' ? '📚' : '🎓'}
                 </span>
@@ -52,13 +44,13 @@ export default function NavBar() {
                   <div style={{ 
                     fontSize: 'var(--font-size-sm)', 
                     fontWeight: '600',
-                    color: 'var(--color-text)'
+                    color: '#FFFFFF'
                   }}>
                     {user.name || user.email}
                   </div>
                   <div style={{ 
                     fontSize: 'var(--font-size-xs)', 
-                    color: 'var(--color-muted)',
+                    color: 'rgba(255, 255, 255, 0.8)',
                     textTransform: 'capitalize'
                   }}>
                     {user.role}

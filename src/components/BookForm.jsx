@@ -96,9 +96,9 @@ export default function BookForm({ initial = null, onSubmit, onCancel }) {
 
   return (
     <form onSubmit={submit} className="book-form">
-      {/* ISBN Section */}
+      {/* Book Identification Section */}
       <div className="form-section">
-        <h4>Book Identification</h4>
+        <h4>🔍 Book Identification</h4>
         <div className="form-row">
           <div className="form-group">
             <label>ISBN</label>
@@ -107,14 +107,25 @@ export default function BookForm({ initial = null, onSubmit, onCancel }) {
               value={form.isbn} 
               onChange={handleChange}
               placeholder="Enter ISBN to auto-fill book details"
+              className="form-input"
             />
             <button 
               type="button" 
               onClick={handleFetch} 
               disabled={loadingApi || !form.isbn}
-              className="btn-small"
+              className="btn-fetch"
             >
-              {loadingApi ? 'Fetching…' : 'Auto-fill from ISBN'}
+              {loadingApi ? (
+                <>
+                  <span className="loading-spinner"></span>
+                  Fetching…
+                </>
+              ) : (
+                <>
+                  <span>🔍</span>
+                  Auto-fill from ISBN
+                </>
+              )}
             </button>
           </div>
         </div>
@@ -125,18 +136,29 @@ export default function BookForm({ initial = null, onSubmit, onCancel }) {
             <label>Or search by title/author</label>
             <div className="search-container">
               <input
-                placeholder="Search for books..."
+                placeholder="Search for books on Google Books..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                className="search-input"
               />
               <button 
                 type="button" 
                 onClick={handleSearch}
                 disabled={searching || !searchQuery.trim()}
-                className="btn-small"
+                className="btn-search"
               >
-                {searching ? 'Searching...' : 'Search'}
+                {searching ? (
+                  <>
+                    <span className="loading-spinner"></span>
+                    Searching...
+                  </>
+                ) : (
+                  <>
+                    <span>🔍</span>
+                    Search Google Books
+                  </>
+                )}
               </button>
             </div>
             
@@ -172,22 +194,41 @@ export default function BookForm({ initial = null, onSubmit, onCancel }) {
 
       {/* Basic Information */}
       <div className="form-section">
-        <h4>Basic Information</h4>
+        <h4>📚 Basic Information</h4>
         <div className="form-row">
           <div className="form-group">
             <label>Title *</label>
-            <input name="title" value={form.title} onChange={handleChange} required />
+            <input 
+              name="title" 
+              value={form.title} 
+              onChange={handleChange} 
+              required 
+              className="form-input"
+              placeholder="Enter book title"
+            />
           </div>
           <div className="form-group">
             <label>Author *</label>
-            <input name="author" value={form.author} onChange={handleChange} required />
+            <input 
+              name="author" 
+              value={form.author} 
+              onChange={handleChange} 
+              required 
+              className="form-input"
+              placeholder="Enter author name"
+            />
           </div>
         </div>
         
         <div className="form-row">
           <div className="form-group">
             <label>Category</label>
-            <select name="category" value={form.category} onChange={handleChange}>
+            <select 
+              name="category" 
+              value={form.category} 
+              onChange={handleChange}
+              className="form-select"
+            >
               <option value="">Select Category</option>
               {CATEGORIES.map(c => (
                 <option key={c} value={c}>{c}</option>
@@ -196,33 +237,64 @@ export default function BookForm({ initial = null, onSubmit, onCancel }) {
           </div>
           <div className="form-group">
             <label>Published Year</label>
-            <input name="publishedYear" value={form.publishedYear} onChange={handleChange} />
+            <input 
+              name="publishedYear" 
+              value={form.publishedYear} 
+              onChange={handleChange} 
+              className="form-input"
+              placeholder="e.g., 2023"
+            />
           </div>
         </div>
       </div>
 
       {/* Additional Details */}
       <div className="form-section">
-        <h4>Additional Details</h4>
+        <h4>📖 Additional Details</h4>
         <div className="form-row">
           <div className="form-group">
             <label>Publisher</label>
-            <input name="publisher" value={form.publisher} onChange={handleChange} />
+            <input 
+              name="publisher" 
+              value={form.publisher} 
+              onChange={handleChange} 
+              className="form-input"
+              placeholder="Enter publisher name"
+            />
           </div>
           <div className="form-group">
             <label>Page Count</label>
-            <input name="pageCount" value={form.pageCount} onChange={handleChange} type="number" />
+            <input 
+              name="pageCount" 
+              value={form.pageCount} 
+              onChange={handleChange} 
+              type="number" 
+              className="form-input"
+              placeholder="e.g., 320"
+            />
           </div>
         </div>
         
         <div className="form-row">
           <div className="form-group">
             <label>Language</label>
-            <input name="language" value={form.language} onChange={handleChange} />
+            <input 
+              name="language" 
+              value={form.language} 
+              onChange={handleChange} 
+              className="form-input"
+              placeholder="e.g., English"
+            />
           </div>
           <div className="form-group">
             <label>Thumbnail URL</label>
-            <input name="thumbnail" value={form.thumbnail} onChange={handleChange} />
+            <input 
+              name="thumbnail" 
+              value={form.thumbnail} 
+              onChange={handleChange} 
+              className="form-input"
+              placeholder="Enter book cover image URL"
+            />
           </div>
         </div>
         
@@ -232,20 +304,23 @@ export default function BookForm({ initial = null, onSubmit, onCancel }) {
             name="description" 
             value={form.description} 
             onChange={handleChange}
-            rows="3"
-            placeholder="Book description..."
+            rows="4"
+            placeholder="Enter a brief description of the book..."
+            className="form-textarea"
           />
         </div>
       </div>
 
-      {/* Actions */}
-      <div className="form-actions" style={{ display: 'flex', gap: 16, marginTop: 24 }}>
-        <button type="submit" className="btn btn-success btn-large" style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: '1.3rem' }}>💾</span> Save Book
+      {/* Form Actions */}
+      <div className="form-actions">
+        <button type="submit" className="btn btn-success btn-large">
+          <span style={{ fontSize: '1.3rem' }}>💾</span> 
+          Save Book
         </button>
         {onCancel && (
-          <button type="button" onClick={onCancel} className="btn btn-secondary btn-large" style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: '1.3rem' }}>✖️</span> Cancel
+          <button type="button" onClick={onCancel} className="btn btn-secondary btn-large">
+            <span style={{ fontSize: '1.3rem' }}>✖️</span> 
+            Cancel
           </button>
         )}
       </div>

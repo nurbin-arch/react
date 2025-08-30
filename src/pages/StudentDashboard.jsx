@@ -57,7 +57,7 @@ export default function StudentDashboard() {
           alerts.push({
             type: 'overdue',
             title: 'Book Overdue!',
-            message: `${books.find(b => b.id === br.bookId)?.title || 'Book'} is overdue. Fine: $${fine.toFixed(2)}`,
+            message: `${books.find(b => b.id === br.bookId)?.title || 'Book'} is overdue. Fine: Rs. ${fine.toFixed(2)}`,
             priority: 'high',
             bookId: br.bookId,
             borrowId: br.id
@@ -112,7 +112,7 @@ export default function StudentDashboard() {
     if (totalFines > 10) {
       status = 'Fines Due'
       statusClass = 'status-danger'
-      description = `You have outstanding fines of $${totalFines.toFixed(2)}`
+              description = `You have outstanding fines of Rs. ${totalFines.toFixed(2)}`
     }
     
     if (activeBorrows >= 5) {
@@ -157,7 +157,7 @@ export default function StudentDashboard() {
       const fine = calculateFine(borrow)
       return { 
         status: 'overdue', 
-        label: `Overdue ($${fine.toFixed(2)})`, 
+        label: `Overdue (Rs. ${fine.toFixed(2)})`, 
         class: 'overdue',
         fine 
       }
@@ -249,9 +249,9 @@ export default function StudentDashboard() {
                 <span className="stat-value">{membershipStatus.totalBorrows}</span>
               </div>
               <div className="membership-stat">
-                <span className="stat-label">Outstanding Fines:</span>
+                <span className="stat-label">Outstanding Fines (Rs.):</span>
                 <span className={`stat-value ${membershipStatus.totalFines > 0 ? 'overdue' : ''}`}>
-                  ${membershipStatus.totalFines.toFixed(2)}
+                  Rs. ${membershipStatus.totalFines.toFixed(2)}
                 </span>
               </div>
             </div>
@@ -279,7 +279,7 @@ export default function StudentDashboard() {
         </div>
         <div className="stat-card">
           <h3>Total Fines</h3>
-          <div className="stat-number overdue">${personalStats.totalFines.toFixed(2)}</div>
+          <div className="stat-number overdue">Rs. ${personalStats.totalFines.toFixed(2)}</div>
         </div>
         <div className="stat-card">
           <h3>Favorite Genre</h3>
@@ -331,7 +331,7 @@ export default function StudentDashboard() {
                       <strong>Due:</strong> {formatDate(br.dueDate)}<br />
                       {borrowStatus.fine && (
                         <strong style={{ color: 'var(--color-danger)' }}>
-                          Fine: ${borrowStatus.fine.toFixed(2)}
+                          Fine: Rs. ${borrowStatus.fine.toFixed(2)}
                         </strong>
                       )}
                     </p>

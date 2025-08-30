@@ -96,19 +96,8 @@
       "id": "2"
     },
     {
-      "id": "3",
-      "title": "1984",
-      "author": "George Orwell",
-      "isbn": "9780451524935",
-      "category": "Fiction",
-      "publishedYear": "1949",
-      "thumbnail": "https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=400&q=80&auto=format&fit=crop",
-      "description": "A dystopian novel about totalitarianism and surveillance society.",
-      "pageCount": 328,
-      "publisher": "Signet Classic",
-      "language": "English",
       "available": true,
-      "createdAt": "2024-01-01T00:00:00.000Z"
+      "id": "3"
     },
     {
       "available": true,
@@ -153,13 +142,8 @@
       "id": "8"
     },
     {
-      "id": "e0d0",
-      "title": "Test Book",
-      "author": "Test Author",
-      "isbn": "1234567890",
-      "category": "Fiction",
-      "publishedYear": "2024",
-      "available": false
+      "available": true,
+      "id": "e0d0"
     }
   ],
   "borrows": [
@@ -249,8 +233,9 @@
       "userId": "1",
       "borrowDate": "2024-01-01T00:00:00.000Z",
       "dueDate": "2024-01-15T00:00:00.000Z",
-      "status": "borrowed",
-      "createdAt": "2024-01-01T00:00:00.000Z"
+      "status": "returned",
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "returnDate": "2025-08-30T15:51:26.575Z"
     },
     {
       "id": "9f6d",
@@ -267,8 +252,9 @@
       "userId": "1",
       "borrowDate": "2024-01-01T00:00:00.000Z",
       "dueDate": "2024-01-05T00:00:00.000Z",
-      "status": "borrowed",
-      "createdAt": "2024-01-01T00:00:00.000Z"
+      "status": "returned",
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "returnDate": "2025-08-30T15:42:30.443Z"
     }
   ]
 }

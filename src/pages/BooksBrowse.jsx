@@ -78,7 +78,7 @@ export default function BooksBrowse() {
       if (borrow) {
         const fine = calculateFine(borrow)
         if (fine > 0) {
-          return { status: 'overdue', label: `Overdue ($${fine.toFixed(2)})`, class: 'overdue' }
+          return { status: 'overdue', label: `Overdue (Rs. ${fine.toFixed(2)})`, class: 'overdue' }
         }
         const dueDate = new Date(borrow.dueDate)
         const now = new Date()
