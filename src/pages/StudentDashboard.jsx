@@ -40,7 +40,99 @@ export default function StudentDashboard() {
     }
   }, [myBorrows, books, calculateFine])
 
+  // Notifications and alerts
+  const notifications = useMemo(() => {
+    const alerts = []
+    
+    // Due date alerts
+    myBorrows
+      .filter(br => br.status === 'borrowed')
+      .forEach(br => {
+        const now = new Date()
+        const due = new Date(br.dueDate)
+        const daysLeft = Math.ceil((due - now) / (1000 * 60 * 60 * 24))
+        
+        if (daysLeft <= 0) {
+          const fine = calculateFine(br)
+          alerts.push({
+            type: 'overdue',
+            title: 'Book Overdue!',
+            message: `${books.find(b => b.id === br.bookId)?.title || 'Book'} is overdue. Fine: $${fine.toFixed(2)}`,
+            priority: 'high',
+            bookId: br.bookId,
+            borrowId: br.id
+          })
+        } else if (daysLeft <= 3) {
+          alerts.push({
+            type: 'due-soon',
+            title: 'Due Soon',
+            message: `${books.find(b => b.id === br.bookId)?.title || 'Book'} is due in ${daysLeft} day${daysLeft !== 1 ? 's' : ''}`,
+            priority: 'medium',
+            bookId: br.bookId,
+            borrowId: br.id
+          })
+        }
+      })
+    
+    // Reservation status (if any books are unavailable but user might want)
+    const unavailableBooks = books.filter(b => !b.available)
+    if (unavailableBooks.length > 0) {
+      alerts.push({
+        type: 'reservation',
+        title: 'Books Available for Reservation',
+        message: `${unavailableBooks.length} book${unavailableBooks.length !== 1 ? 's' : ''} are currently borrowed but will be available soon`,
+        priority: 'low',
+        action: 'browse'
+      })
+    }
+    
+    return alerts.sort((a, b) => {
+      const priorityOrder = { high: 3, medium: 2, low: 1 }
+      return priorityOrder[b.priority] - priorityOrder[a.priority]
+    })
+  }, [myBorrows, books, calculateFine])
 
+  // Membership status
+  const membershipStatus = useMemo(() => {
+    const totalBorrows = myBorrows.length
+    const activeBorrows = myBorrows.filter(br => br.status === 'borrowed').length
+    const overdueCount = myBorrows.filter(br => br.status === 'borrowed' && calculateFine(br) > 0).length
+    const totalFines = myBorrows.reduce((sum, br) => sum + calculateFine(br), 0)
+    
+    let status = 'Good Standing'
+    let statusClass = 'status-good'
+    let description = 'Your account is in good standing'
+    
+    if (overdueCount > 0) {
+      status = 'Overdue Items'
+      statusClass = 'status-warning'
+      description = `You have ${overdueCount} overdue book${overdueCount !== 1 ? 's' : ''}`
+    }
+    
+    if (totalFines > 10) {
+      status = 'Fines Due'
+      statusClass = 'status-danger'
+      description = `You have outstanding fines of $${totalFines.toFixed(2)}`
+    }
+    
+    if (activeBorrows >= 5) {
+      status = 'Borrowing Limit'
+      statusClass = 'status-info'
+      description = 'You have reached the maximum number of borrowed books (5)'
+    }
+    
+    return {
+      status,
+      statusClass,
+      description,
+      totalBorrows,
+      activeBorrows,
+      overdueCount,
+      totalFines,
+      maxBorrows: 5,
+      remainingBorrows: Math.max(0, 5 - activeBorrows)
+    }
+  }, [myBorrows, calculateFine])
 
   const handleReturn = async (borrowId) => {
     try {
@@ -84,6 +176,88 @@ export default function StudentDashboard() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h2>Hi, {user.email}</h2>
       </div>
+
+      {/* Notifications Section */}
+      {notifications.length > 0 && (
+        <section className="notifications-section">
+          <h3>🔔 Notifications & Alerts</h3>
+          <div className="notifications-grid">
+            {notifications.map((alert, index) => (
+              <div key={index} className={`notification-card ${alert.priority}`}>
+                <div className="notification-header">
+                  <span className={`notification-icon ${alert.type}`}>
+                    {alert.type === 'overdue' ? '⚠️' : 
+                     alert.type === 'due-soon' ? '⏰' : '📚'}
+                  </span>
+                  <span className={`notification-priority ${alert.priority}`}>
+                    {alert.priority.toUpperCase()}
+                  </span>
+                </div>
+                <h4 className="notification-title">{alert.title}</h4>
+                <p className="notification-message">{alert.message}</p>
+                {alert.action === 'browse' && (
+                  <button 
+                    onClick={() => window.location.href = '/books'}
+                    className="btn btn-small"
+                  >
+                    Browse Books
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Profile Section */}
+      <section className="profile-section">
+        <h3>👤 Profile & Membership</h3>
+        <div className="profile-grid">
+          <div className="profile-card">
+            <div className="profile-header">
+              <div className="profile-avatar">👤</div>
+              <div className="profile-info">
+                <h4>{user.name || user.email}</h4>
+                <p className="profile-email">{user.email}</p>
+                <p className="profile-role">Role: {user.role === 'student' ? 'Student' : 'Librarian'}</p>
+                <p className="profile-member-since">
+                  Member since: {user.createdAt ? formatDate(user.createdAt) : 'Recently'}
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="membership-card">
+            <div className="membership-header">
+              <h4>📋 Membership Status</h4>
+              <span className={`membership-status ${membershipStatus.statusClass}`}>
+                {membershipStatus.status}
+              </span>
+            </div>
+            <p className="membership-description">{membershipStatus.description}</p>
+            <div className="membership-stats">
+              <div className="membership-stat">
+                <span className="stat-label">Active Borrows:</span>
+                <span className="stat-value">{membershipStatus.activeBorrows}/{membershipStatus.maxBorrows}</span>
+              </div>
+              <div className="membership-stat">
+                <span className="stat-label">Remaining:</span>
+                <span className="stat-value">{membershipStatus.remainingBorrows} books</span>
+              </div>
+              <div className="membership-stat">
+                <span className="stat-label">Total Borrows:</span>
+                <span className="stat-value">{membershipStatus.totalBorrows}</span>
+              </div>
+              <div className="membership-stat">
+                <span className="stat-label">Outstanding Fines:</span>
+                <span className={`stat-value ${membershipStatus.totalFines > 0 ? 'overdue' : ''}`}>
+                  ${membershipStatus.totalFines.toFixed(2)}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Personal Reading Stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16 }}>
@@ -207,9 +381,9 @@ export default function StudentDashboard() {
                     <p className="book-author">by {book.author}</p>
                     <p className="book-meta">{book.category} • {book.publishedYear}</p>
                     <div className="book-actions">
-                      <button onClick={() => startBorrow(book)} className="btn-small">
-                        Borrow
-                      </button>
+                      <a href="/books" className="btn btn-small">
+                        Browse
+                      </a>
                     </div>
                   </div>
                 </div>

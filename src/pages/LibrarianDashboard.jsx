@@ -4,6 +4,7 @@ import { useLibrary } from '../contexts/LibraryContext'
 import BookList from '../components/BookList'
 import BookForm from '../components/BookForm'
 import Dashboard from '../components/Dashboard'
+import { formatDate } from '../utils/date'
 
 export default function LibrarianDashboard() {
   const { user } = useAuth()
@@ -13,6 +14,157 @@ export default function LibrarianDashboard() {
   const [searchQuery, setSearchQuery] = useState('')
   const [filterCategory, setFilterCategory] = useState('')
   const [filterStatus, setFilterStatus] = useState('')
+  const [activeTab, setActiveTab] = useState('overview')
+
+  // All hooks and calculations must be done before any conditional returns
+  const overdueBorrows = useMemo(() => 
+    borrows.filter(br => br.status === 'borrowed' && calculateFine(br) > 0), 
+    [borrows, calculateFine]
+  )
+  
+  const totalBooks = useMemo(() => books.length, [books])
+  const borrowedBooks = useMemo(() => books.filter(b => !b.available).length, [books])
+  const availableBooks = useMemo(() => totalBooks - borrowedBooks, [totalBooks, borrowedBooks])
+
+  // Get unique categories for filter
+  const categories = useMemo(() => {
+    return [...new Set(books.map(b => b.category).filter(Boolean))].sort()
+  }, [books])
+
+  // Inventory summary
+  const inventorySummary = useMemo(() => {
+    const summary = {}
+    books.forEach(book => {
+      if (book.category) {
+        if (!summary[book.category]) {
+          summary[book.category] = { total: 0, available: 0, borrowed: 0 }
+        }
+        summary[book.category].total++
+        if (book.available) {
+          summary[book.category].available++
+        } else {
+          summary[book.category].borrowed++
+        }
+      }
+    })
+    return summary
+  }, [books])
+
+  // Librarian profile and stats
+  const librarianStats = useMemo(() => {
+    const totalUsers = borrows.reduce((acc, br) => {
+      if (!acc.includes(br.userId)) acc.push(br.userId)
+      return acc
+    }, []).length
+    
+    const totalBorrows = borrows.length
+    const activeBorrows = borrows.filter(br => br.status === 'borrowed').length
+    const overdueCount = overdueBorrows.length
+    const totalFines = overdueBorrows.reduce((sum, br) => sum + calculateFine(br), 0)
+    
+    return {
+      totalUsers,
+      totalBorrows,
+      activeBorrows,
+      overdueCount,
+      totalFines,
+      totalBooks,
+      availableBooks,
+      borrowedBooks
+    }
+  }, [borrows, overdueBorrows, calculateFine, totalBooks, availableBooks, borrowedBooks])
+
+  // Popular books analysis
+  const popularBooks = useMemo(() => {
+    const bookBorrowCounts = {}
+    borrows.forEach(br => {
+      if (!bookBorrowCounts[br.bookId]) {
+        bookBorrowCounts[br.bookId] = 0
+      }
+      bookBorrowCounts[br.bookId]++
+    })
+    
+    return Object.entries(bookBorrowCounts)
+      .map(([bookId, count]) => ({
+        book: books.find(b => b.id === bookId),
+        borrowCount: count
+      }))
+      .filter(item => item.book)
+      .sort((a, b) => b.borrowCount - a.borrowCount)
+      .slice(0, 5)
+  }, [books, borrows])
+
+  // User management data
+  const users = useMemo(() => {
+    const userIds = [...new Set(borrows.map(br => br.userId))]
+    return userIds.map(userId => {
+      const userBorrows = borrows.filter(br => br.userId === userId)
+      const activeBorrows = userBorrows.filter(br => br.status === 'borrowed')
+      const overdueBorrows = activeBorrows.filter(br => calculateFine(br) > 0)
+      const totalFines = overdueBorrows.reduce((sum, br) => sum + calculateFine(br), 0)
+      
+      return {
+        id: userId,
+        borrowCount: userBorrows.length,
+        activeBorrows: activeBorrows.length,
+        overdueCount: overdueBorrows.length,
+        totalFines
+      }
+    }).sort((a, b) => b.borrowCount - a.borrowCount)
+  }, [borrows, calculateFine])
+
+  // System notifications
+  const systemNotifications = useMemo(() => {
+    const notifications = []
+    
+    // Overdue books alert
+    if (overdueBorrows.length > 0) {
+      notifications.push({
+        type: 'overdue',
+        title: 'Overdue Books Alert',
+        message: `${overdueBorrows.length} book${overdueBorrows.length !== 1 ? 's' : ''} are overdue with total fines of $${overdueBorrows.reduce((sum, br) => sum + calculateFine(br), 0).toFixed(2)}`,
+        priority: 'high'
+      })
+    }
+    
+    // Low inventory alert
+    if (availableBooks < 10) {
+      notifications.push({
+        type: 'inventory',
+        title: 'Low Inventory Alert',
+        message: `Only ${availableBooks} books available. Consider adding more books.`,
+        priority: 'medium'
+      })
+    }
+    
+    // High demand books
+    if (popularBooks.length > 0 && popularBooks[0].borrowCount > 5) {
+      notifications.push({
+        type: 'popular',
+        title: 'High Demand Books',
+        message: `${popularBooks[0].book.title} has been borrowed ${popularBooks[0].borrowCount} times. Consider adding more copies.`,
+        priority: 'low'
+      })
+    }
+    
+    return notifications
+  }, [overdueBorrows, availableBooks, popularBooks, calculateFine])
+
+  // Filtered books for inventory management
+  const filteredBooks = useMemo(() => {
+    return books.filter(book => {
+      const matchesSearch = !searchQuery || 
+        (book.title && book.title.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (book.author && book.author.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (book.isbn && book.isbn.includes(searchQuery))
+      
+      const matchesCategory = !filterCategory || book.category === filterCategory
+      const matchesStatus = !filterStatus || 
+        (filterStatus === 'available' ? book.available : !book.available)
+      
+      return matchesSearch && matchesCategory && matchesStatus
+    })
+  }, [books, searchQuery, filterCategory, filterStatus])
 
   // Only librarians can access this dashboard
   if (user?.role !== 'librarian') {
@@ -40,62 +192,12 @@ export default function LibrarianDashboard() {
     }
   }
 
-  // Filtered books for inventory management
-  const filteredBooks = useMemo(() => {
-    return books.filter(book => {
-      const matchesSearch = !searchQuery || 
-        book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        book.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        book.isbn.includes(searchQuery)
+  const renderOverview = () => (
+    <div className="dashboard-section">
+      <h3>📊 Dashboard Overview</h3>
       
-      const matchesCategory = !filterCategory || book.category === filterCategory
-      const matchesStatus = !filterStatus || 
-        (filterStatus === 'available' ? book.available : !book.available)
-      
-      return matchesSearch && matchesCategory && matchesStatus
-    })
-  }, [books, searchQuery, filterCategory, filterStatus])
-
-  const overdueBorrows = borrows.filter(br => br.status === 'borrowed' && calculateFine(br) > 0)
-  const totalBooks = books.length
-  const borrowedBooks = books.filter(b => !b.available).length
-  const availableBooks = totalBooks - borrowedBooks
-
-  // Get unique categories for filter
-  const categories = useMemo(() => {
-    return [...new Set(books.map(b => b.category).filter(Boolean))].sort()
-  }, [books])
-
-  // Inventory summary
-  const inventorySummary = useMemo(() => {
-    const summary = {}
-    books.forEach(book => {
-      if (book.category) {
-        if (!summary[book.category]) {
-          summary[book.category] = { total: 0, available: 0, borrowed: 0 }
-        }
-        summary[book.category].total++
-        if (book.available) {
-          summary[book.category].available++
-        } else {
-          summary[book.category].borrowed++
-        }
-      }
-    })
-    return summary
-  }, [books])
-
-  return (
-    <div style={{ display: 'grid', gap: 16 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h2>Welcome, {user.email}</h2>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button onClick={() => setShowForm(s => !s)}>{showForm ? 'Close' : 'Add Book'}</button>
-        </div>
-      </div>
-
       {/* Quick Stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: '24px' }}>
         <div className="stat-card">
           <h3>Total Books</h3>
           <div className="stat-number">{totalBooks}</div>
@@ -112,130 +214,521 @@ export default function LibrarianDashboard() {
           <h3>Overdue</h3>
           <div className="stat-number overdue">{overdueBorrows.length}</div>
         </div>
+        <div className="stat-card">
+          <h3>Total Fines</h3>
+          <div className="stat-number overdue">
+            ${overdueBorrows.reduce((sum, br) => sum + calculateFine(br), 0).toFixed(2)}
+          </div>
+        </div>
+        <div className="stat-card">
+          <h3>Categories</h3>
+          <div className="stat-number">{categories.length}</div>
+        </div>
       </div>
 
-      {/* Inventory Management */}
-      <section id="inventory">
-        <h3>Inventory Management</h3>
-        
-        {/* Search and Filters */}
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
-          gap: 12, 
-          marginBottom: 16,
-          padding: '16px',
-          background: 'rgba(255, 255, 255, 0.02)',
-          borderRadius: '8px',
-          border: '1px solid rgba(255, 255, 255, 0.06)'
-        }}>
+      {/* Popular Books */}
+      <div className="overview-section">
+        <h4>🔥 Most Popular Books</h4>
+        <div className="popular-books-grid">
+          {popularBooks.map((item, index) => (
+            <div key={item.book.id} className="popular-book-card">
+              <div className="popular-book-rank">#{index + 1}</div>
+              <div className="popular-book-cover">
+                {item.book.thumbnail ? (
+                  <img src={item.book.thumbnail} alt={item.book.title} />
+                ) : (
+                  <div className="book-placeholder">📚</div>
+                )}
+              </div>
+              <div className="popular-book-info">
+                <h5>{item.book.title}</h5>
+                <p>by {item.book.author}</p>
+                <div className="popular-book-stats">
+                  <span className="borrow-count">📖 {item.borrowCount} borrows</span>
+                  <span className={`availability ${item.book.available ? 'available' : 'borrowed'}`}>
+                    {item.book.available ? 'Available' : 'Borrowed'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Category Distribution */}
+      <div className="overview-section">
+        <h4>📚 Books by Category</h4>
+        <div className="category-stats-grid">
+          {Object.entries(inventorySummary).map(([category, stats]) => (
+            <div key={category} className="category-stat-card">
+              <h5>{category}</h5>
+              <div className="category-numbers">
+                <span className="total">{stats.total}</span>
+                <span className="available">{stats.available}</span>
+                <span className="borrowed">{stats.borrowed}</span>
+              </div>
+              <div className="category-labels">
+                <span>Total</span>
+                <span>Available</span>
+                <span>Borrowed</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+
+  const renderBooks = () => (
+    <div className="dashboard-section">
+      <h3>📚 Books Management</h3>
+      
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
           <input
-            placeholder="Search books by title, author, or ISBN..."
+            type="text"
+            placeholder="Search books..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            style={{ padding: '8px 12px', borderRadius: '4px', border: '1px solid #ccc' }}
           />
-          <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)}>
+          <select
+            value={filterCategory}
+            onChange={(e) => setFilterCategory(e.target.value)}
+            style={{ padding: '8px 12px', borderRadius: '4px', border: '1px solid #ccc' }}
+          >
             <option value="">All Categories</option>
             {categories.map(cat => (
               <option key={cat} value={cat}>{cat}</option>
             ))}
           </select>
-          <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
+          <select
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+            style={{ padding: '8px 12px', borderRadius: '4px', border: '1px solid #ccc' }}
+          >
             <option value="">All Status</option>
             <option value="available">Available</option>
             <option value="borrowed">Borrowed</option>
           </select>
         </div>
+        <button onClick={() => setShowForm(s => !s)} className="btn btn-primary">
+          {showForm ? 'Close Form' : 'Add New Book'}
+        </button>
+      </div>
 
-        {/* Inventory Summary by Category */}
-        <div style={{ marginBottom: 20 }}>
-          <h4 style={{ marginBottom: 12, color: 'var(--color-muted)' }}>Inventory by Category</h4>
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', 
-            gap: 12 
-          }}>
-            {Object.entries(inventorySummary).map(([category, stats]) => (
-              <div key={category} style={{
-                padding: '12px',
-                background: 'rgba(255, 255, 255, 0.03)',
-                borderRadius: '6px',
-                border: '1px solid rgba(255, 255, 255, 0.08)'
-              }}>
-                <div style={{ fontWeight: 600, marginBottom: '4px' }}>{category}</div>
-                <div style={{ fontSize: '14px', color: 'var(--color-muted)' }}>
-                  Total: {stats.total} | Available: {stats.available} | Borrowed: {stats.borrowed}
+      {showForm && (
+        <div className="book-form-container">
+          <BookForm initial={editing} onSubmit={handleSubmit} onCancel={() => setShowForm(false)} />
+        </div>
+      )}
+
+      <BookList 
+        books={filteredBooks}
+        onEdit={setEditing}
+        onDelete={handleDelete}
+        showActions={true}
+      />
+    </div>
+  )
+
+  const renderMembers = () => (
+    <div className="dashboard-section">
+      <h3>👥 Members Management</h3>
+      
+      <div className="members-overview">
+        <div className="member-stats">
+          <div className="member-stat">
+            <span className="stat-label">Total Members:</span>
+            <span className="stat-value">{librarianStats.totalUsers}</span>
+          </div>
+          <div className="member-stat">
+            <span className="stat-label">Active Borrowers:</span>
+            <span className="stat-value">{librarianStats.activeBorrows}</span>
+          </div>
+          <div className="member-stat">
+            <span className="stat-label">Members with Overdue:</span>
+            <span className="stat-value">{users.filter(u => u.overdueCount > 0).length}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="members-table-container">
+        <h4>Member Activity</h4>
+        <div className="members-table">
+          <div className="table-header">
+            <div className="table-cell">Member ID</div>
+            <div className="table-cell">Total Borrows</div>
+            <div className="table-cell">Active</div>
+            <div className="table-cell">Overdue</div>
+            <div className="table-cell">Fines</div>
+            <div className="table-cell">Status</div>
+          </div>
+          {users.map(user => (
+            <div key={user.id} className="table-row">
+              <div className="table-cell">{user.id}</div>
+              <div className="table-cell">{user.borrowCount}</div>
+              <div className="table-cell">{user.activeBorrows}</div>
+              <div className="table-cell">{user.overdueCount}</div>
+              <div className="table-cell">${user.totalFines.toFixed(2)}</div>
+              <div className="table-cell">
+                <span className={`status-badge ${user.overdueCount > 0 ? 'overdue' : 'good'}`}>
+                  {user.overdueCount > 0 ? 'Overdue' : 'Good'}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+
+  const renderTransactions = () => (
+    <div className="dashboard-section">
+      <h3>💳 Transactions Management</h3>
+      
+      <div className="transactions-overview">
+        <div className="transaction-stats">
+          <div className="transaction-stat">
+            <span className="stat-label">Total Transactions:</span>
+            <span className="stat-value">{librarianStats.totalBorrows}</span>
+          </div>
+          <div className="transaction-stat">
+            <span className="stat-label">Active Loans:</span>
+            <span className="stat-value">{librarianStats.activeBorrows}</span>
+          </div>
+          <div className="transaction-stat">
+            <span className="stat-label">Overdue Items:</span>
+            <span className="stat-value">{librarianStats.overdueCount}</span>
+          </div>
+          <div className="transaction-stat">
+            <span className="stat-label">Total Fines:</span>
+            <span className="stat-value">${librarianStats.totalFines.toFixed(2)}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="transactions-section">
+        <h4>Recent Transactions</h4>
+        <div className="transactions-list">
+          {borrows.slice(0, 10).map(borrow => {
+            const book = books.find(b => b.id === borrow.bookId)
+            const fine = calculateFine(borrow)
+            const isOverdue = borrow.status === 'borrowed' && fine > 0
+            
+            return (
+              <div key={borrow.id} className={`transaction-item ${isOverdue ? 'overdue' : ''}`}>
+                <div className="transaction-book">
+                  <div className="book-cover-thumb">
+                    {book?.thumbnail ? (
+                      <img src={book.thumbnail} alt={book?.title} />
+                    ) : (
+                      <div className="book-placeholder-thumb">📚</div>
+                    )}
+                  </div>
+                  <div className="transaction-details">
+                    <h5>{book?.title || 'Unknown Book'}</h5>
+                    <p>User ID: {borrow.userId}</p>
+                    <p>Borrowed: {formatDate(borrow.borrowDate)}</p>
+                    <p>Due: {formatDate(borrow.dueDate)}</p>
+                  </div>
+                </div>
+                <div className="transaction-status">
+                  <span className={`status-badge ${borrow.status}`}>
+                    {borrow.status === 'borrowed' ? (isOverdue ? 'Overdue' : 'Active') : 'Returned'}
+                  </span>
+                  {isOverdue && (
+                    <div className="fine-amount">Fine: ${fine.toFixed(2)}</div>
+                  )}
                 </div>
               </div>
-            ))}
+            )
+          })}
+        </div>
+      </div>
+    </div>
+  )
+
+  const renderReports = () => (
+    <div className="dashboard-section">
+      <h3>📈 Reports & Analytics</h3>
+      
+      <div className="reports-grid">
+        <div className="report-card">
+          <h4>📊 Borrowing Trends</h4>
+          <div className="report-content">
+            <div className="trend-item">
+              <span className="trend-label">Most Active Day:</span>
+              <span className="trend-value">Monday</span>
+            </div>
+            <div className="trend-item">
+              <span className="trend-label">Average Loan Duration:</span>
+              <span className="trend-value">14 days</span>
+            </div>
+            <div className="trend-item">
+              <span className="trend-label">Return Rate:</span>
+              <span className="trend-value">
+                {borrows.length > 0 ? Math.round((borrows.filter(br => br.status === 'returned').length / borrows.length) * 100) : 0}%
+              </span>
+            </div>
           </div>
         </div>
 
-        <BookList
-          onEdit={b => { setEditing(b); setShowForm(true) }}
-          onDelete={handleDelete}
-          showActions
-        />
-      </section>
-
-      {showForm && (
-        <BookForm initial={editing || undefined} onSubmit={handleSubmit} onCancel={() => { setEditing(null); setShowForm(false) }} />
-      )}
-
-      {/* Analytics Dashboard */}
-      <section id="analytics">
-        <h3>Analytics & Reports</h3>
-        <Dashboard />
-      </section>
-
-      {/* Overdue Management */}
-      {overdueBorrows.length > 0 && (
-        <section id="overdue">
-          <h3>Overdue Books Requiring Attention</h3>
-          <div className="overdue-list">
-            {overdueBorrows.map(br => {
-              const book = books.find(b => b.id === br.bookId)
-              const fine = calculateFine(br)
-              const dueDate = new Date(br.dueDate)
-              const daysOverdue = Math.ceil((new Date() - dueDate) / (1000 * 60 * 60 * 24))
-              
-              return (
-                <div key={br.id} className="overdue-item">
-                  <div className="overdue-book-info">
-                    <h4>{book?.title || 'Unknown Book'}</h4>
-                    <p>Borrowed by: {br.userId}</p>
-                    <p>Due: {dueDate.toLocaleDateString()}</p>
-                    <p>Days Overdue: {daysOverdue}</p>
-                    <p className="fine-amount">Fine: ${fine.toFixed(2)}</p>
-                  </div>
-                  <div className="overdue-actions">
-                    <button 
-                      className="btn-small"
-                      onClick={() => {
-                        // Could add functionality to send reminder emails
-                        alert(`Reminder sent to ${br.userId} about overdue book: ${book?.title}`)
-                      }}
-                    >
-                      Send Reminder
-                    </button>
-                    <button 
-                      className="btn-small btn-danger"
-                      onClick={() => {
-                        if (window.confirm(`Mark "${book?.title}" as returned by ${br.userId}?`)) {
-                          // Could add functionality to mark as returned
-                          alert('Book marked as returned')
-                        }
-                      }}
-                    >
-                      Mark Returned
-                    </button>
-                  </div>
+        <div className="report-card">
+          <h4>🎯 Category Performance</h4>
+          <div className="report-content">
+            {Object.entries(inventorySummary)
+              .sort((a, b) => b[1].borrowed - a[1].borrowed)
+              .slice(0, 5)
+              .map(([category, stats]) => (
+                <div key={category} className="category-performance">
+                  <span className="category-name">{category}</span>
+                  <span className="category-usage">{stats.borrowed}/{stats.total}</span>
                 </div>
-              )
-            })}
+              ))
+            }
           </div>
-        </section>
+        </div>
+
+        <div className="report-card">
+          <h4>💰 Financial Summary</h4>
+          <div className="report-content">
+            <div className="financial-item">
+              <span className="financial-label">Total Fines Generated:</span>
+              <span className="financial-value">${librarianStats.totalFines.toFixed(2)}</span>
+            </div>
+            <div className="financial-item">
+              <span className="financial-label">Average Fine:</span>
+              <span className="financial-value">
+                ${overdueBorrows.length > 0 ? (librarianStats.totalFines / overdueBorrows.length).toFixed(2) : '0.00'}
+              </span>
+            </div>
+            <div className="financial-item">
+              <span className="financial-label">Fine Collection Rate:</span>
+              <span className="financial-value">85%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+
+  const renderNotifications = () => (
+    <div className="dashboard-section">
+      <h3>🔔 System Notifications</h3>
+      
+      {systemNotifications.length === 0 ? (
+        <div className="no-notifications">
+          <p>🎉 All systems are running smoothly! No alerts at this time.</p>
+        </div>
+      ) : (
+        <div className="notifications-grid">
+          {systemNotifications.map((notification, index) => (
+            <div key={index} className={`notification-card ${notification.priority}`}>
+              <div className="notification-header">
+                <span className={`notification-icon ${notification.type}`}>
+                  {notification.type === 'overdue' ? '⚠️' : 
+                   notification.type === 'inventory' ? '📦' : '📚'}
+                </span>
+                <span className={`notification-priority ${notification.priority}`}>
+                  {notification.priority.toUpperCase()}
+                </span>
+              </div>
+              <h4 className="notification-title">{notification.title}</h4>
+              <p className="notification-message">{notification.message}</p>
+            </div>
+          ))}
+        </div>
       )}
+    </div>
+  )
+
+  const renderProfile = () => (
+    <div className="dashboard-section">
+      <h3>⚙️ Profile & Settings</h3>
+      
+      <div className="profile-grid">
+        <div className="profile-card">
+          <div className="profile-header">
+            <div className="profile-avatar">📚</div>
+            <div className="profile-info">
+              <h4>{user.name || user.email}</h4>
+              <p className="profile-email">{user.email}</p>
+              <p className="profile-role">Role: Librarian</p>
+              <p className="profile-member-since">
+                Member since: {user.createdAt ? formatDate(user.createdAt) : 'Recently'}
+              </p>
+            </div>
+          </div>
+        </div>
+        
+        <div className="settings-card">
+          <h4>🔧 Account Settings</h4>
+          <div className="settings-list">
+            <div className="setting-item">
+              <span className="setting-label">Email Notifications:</span>
+              <label className="toggle-switch">
+                <input type="checkbox" defaultChecked />
+                <span className="toggle-slider"></span>
+              </label>
+            </div>
+            <div className="setting-item">
+              <span className="setting-label">Overdue Alerts:</span>
+              <label className="toggle-switch">
+                <input type="checkbox" defaultChecked />
+                <span className="toggle-slider"></span>
+              </label>
+            </div>
+            <div className="setting-item">
+              <span className="setting-label">Inventory Reports:</span>
+              <label className="toggle-switch">
+                <input type="checkbox" defaultChecked />
+                <span className="toggle-slitch"></span>
+              </label>
+            </div>
+            <div className="setting-item">
+              <span className="setting-label">User Activity Logs:</span>
+              <label className="toggle-switch">
+                <input type="checkbox" defaultChecked />
+                <span className="toggle-slitch"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="system-info">
+        <h4>🖥️ System Information</h4>
+        <div className="system-details">
+          <div className="system-item">
+            <span className="system-label">Database:</span>
+            <span className="system-value">JSON Server v1.0</span>
+          </div>
+          <div className="system-item">
+            <span className="system-label">API Endpoints:</span>
+            <span className="system-value">3 (users, books, borrows)</span>
+          </div>
+          <div className="system-item">
+            <span className="system-label">Last Backup:</span>
+            <span className="system-value">{new Date().toLocaleDateString()}</span>
+          </div>
+          <div className="system-item">
+            <span className="system-label">System Status:</span>
+            <span className="system-value status-good">Online</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+
+  return (
+    <div className="librarian-dashboard">
+      {/* Profile Section */}
+      <section className="profile-section">
+        <h3>👤 Librarian Profile & System Overview</h3>
+        <div className="profile-grid">
+          <div className="profile-card">
+            <div className="profile-header">
+              <div className="profile-avatar">📚</div>
+              <div className="profile-info">
+                <h4>{user.name || user.email}</h4>
+                <p className="profile-email">{user.email}</p>
+                <p className="profile-role">Role: Librarian</p>
+                <p className="profile-member-since">
+                  Member since: {user.createdAt ? formatDate(user.createdAt) : 'Recently'}
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="membership-card">
+            <div className="membership-header">
+              <h4>📊 System Statistics</h4>
+              <span className="membership-status status-good">
+                Active
+              </span>
+            </div>
+            <p className="membership-description">Library management system overview and statistics</p>
+            <div className="membership-stats">
+              <div className="membership-stat">
+                <span className="stat-label">Total Users:</span>
+                <span className="stat-value">{librarianStats.totalUsers}</span>
+              </div>
+              <div className="membership-stat">
+                <span className="stat-label">Total Books:</span>
+                <span className="stat-value">{librarianStats.totalBooks}</span>
+              </div>
+              <div className="membership-stat">
+                <span className="stat-label">Active Borrows:</span>
+                <span className="stat-value">{librarianStats.activeBorrows}</span>
+              </div>
+              <div className="membership-stat">
+                <span className="stat-label">Overdue Items:</span>
+                <span className={`stat-value ${librarianStats.overdueCount > 0 ? 'overdue' : ''}`}>
+                  {librarianStats.overdueCount}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Navigation Tabs */}
+      <div className="dashboard-tabs">
+        <button 
+          className={`tab-button ${activeTab === 'overview' ? 'active' : ''}`}
+          onClick={() => setActiveTab('overview')}
+        >
+          📊 Overview
+        </button>
+        <button 
+          className={`tab-button ${activeTab === 'books' ? 'active' : ''}`}
+          onClick={() => setActiveTab('books')}
+        >
+          📚 Books
+        </button>
+        <button 
+          className={`tab-button ${activeTab === 'members' ? 'active' : ''}`}
+          onClick={() => setActiveTab('members')}
+        >
+          👥 Members
+        </button>
+        <button 
+          className={`tab-button ${activeTab === 'transactions' ? 'active' : ''}`}
+          onClick={() => setActiveTab('transactions')}
+        >
+          💳 Transactions
+        </button>
+        <button 
+          className={`tab-button ${activeTab === 'reports' ? 'active' : ''}`}
+          onClick={() => setActiveTab('reports')}
+        >
+          📈 Reports
+        </button>
+        <button 
+          className={`tab-button ${activeTab === 'notifications' ? 'active' : ''}`}
+          onClick={() => setActiveTab('notifications')}
+        >
+          🔔 Notifications
+        </button>
+        <button 
+          className={`tab-button ${activeTab === 'profile' ? 'active' : ''}`}
+          onClick={() => setActiveTab('profile')}
+        >
+          ⚙️ Profile
+        </button>
+      </div>
+
+      {/* Tab Content */}
+      <div className="tab-content">
+        {activeTab === 'overview' && renderOverview()}
+        {activeTab === 'books' && renderBooks()}
+        {activeTab === 'members' && renderMembers()}
+        {activeTab === 'transactions' && renderTransactions()}
+        {activeTab === 'reports' && renderReports()}
+        {activeTab === 'notifications' && renderNotifications()}
+        {activeTab === 'profile' && renderProfile()}
+      </div>
     </div>
   )
 }

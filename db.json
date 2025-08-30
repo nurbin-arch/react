@@ -151,6 +151,15 @@
     {
       "available": true,
       "id": "8"
+    },
+    {
+      "id": "e0d0",
+      "title": "Test Book",
+      "author": "Test Author",
+      "isbn": "1234567890",
+      "category": "Fiction",
+      "publishedYear": "2024",
+      "available": false
     }
   ],
   "borrows": [
@@ -233,6 +242,33 @@
       "status": "returned",
       "createdAt": "2025-08-30T09:29:39.280Z",
       "returnDate": "2025-08-30T09:30:01.217Z"
+    },
+    {
+      "id": "a17d",
+      "bookId": "3",
+      "userId": "1",
+      "borrowDate": "2024-01-01T00:00:00.000Z",
+      "dueDate": "2024-01-15T00:00:00.000Z",
+      "status": "borrowed",
+      "createdAt": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "9f6d",
+      "bookId": "5",
+      "userId": "1",
+      "borrowDate": "2024-01-20T00:00:00.000Z",
+      "dueDate": "2024-01-23T00:00:00.000Z",
+      "status": "borrowed",
+      "createdAt": "2024-01-20T00:00:00.000Z"
+    },
+    {
+      "id": "d0e5",
+      "bookId": "e0d0",
+      "userId": "1",
+      "borrowDate": "2024-01-01T00:00:00.000Z",
+      "dueDate": "2024-01-05T00:00:00.000Z",
+      "status": "borrowed",
+      "createdAt": "2024-01-01T00:00:00.000Z"
     }
   ]
 }
