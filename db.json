@@ -84,6 +84,20 @@
       "password": "test123",
       "role": "student",
       "name": "Test User"
+    },
+    {
+      "id": "bf32",
+      "email": "student@library.com",
+      "password": "student123",
+      "role": "student",
+      "createdAt": "2025-08-30T16:18:49.710Z"
+    },
+    {
+      "id": "159f",
+      "email": "librarian1@library.com",
+      "password": "librarian123",
+      "role": "librarian",
+      "createdAt": "2025-08-30T16:42:06.074Z"
     }
   ],
   "books": [
@@ -133,6 +147,55 @@
     {
       "available": true,
       "id": "e0d0"
+    },
+    {
+      "id": "e195",
+      "title": "Section 8 Housing",
+      "author": "United States. Congress. House. Committee on Government Operations. Employment, Housing, and Aviation Subcommittee",
+      "isbn": "8",
+      "category": "Business & Economics",
+      "publishedYear": "1995",
+      "thumbnail": "http://books.google.com/books/content?id=dbPMPRurcdgC&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api",
+      "description": "",
+      "pageCount": 360,
+      "publisher": "",
+      "language": "en",
+      "averageRating": "",
+      "ratingsCount": "",
+      "previewLink": "http://books.google.com/books?id=dbPMPRurcdgC&pg=PA225&dq=8&hl=&cd=1&source=gbs_api",
+      "infoLink": "https://play.google.com/store/books/details?id=dbPMPRurcdgC&source=gbs_api",
+      "available": true,
+      "createdAt": "2025-08-30T16:19:51.167Z"
+    },
+    {
+      "id": "c5bc",
+      "title": "Rich Dad Poor Dad - What the Rich Teach Their Kids About Money",
+      "author": "Robert T. Kiyosaki",
+      "isbn": "9780359727896",
+      "category": "Business & Economics",
+      "publishedYear": "2021",
+      "thumbnail": "http://books.google.com/books/content?id=kRqeDwAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api",
+      "description": "In Rich Dad Poor Dad, the #1 Personal Finance book of all time, Robert Kiyosaki shares the story of his two dad: his real father and his rich dad. One was educated and an employee all his life, the other's education was street smarts\" over traditional classroom education and he took the path of entrepreneurship?a road that led him to become one of the wealthiest men in Hawaii. Robert's poor dad struggled financially all his life. and these two dads had varying points of view of money and investing.Rich Dad Poor Dad will?? explode the myth that you need to earn a high income to become rich? challenge the belief that your house is an asset? show parents why they can't rely on the school system to teach their kids about money? define, once and for all, an asset and a liability? explain the difference between good debt and bad debt? teach you to see the world of money from different perspectives? discuss the shift in mindset that can put you on the road to financial freedom",
+      "pageCount": 196,
+      "publisher": "Lulu.com",
+      "language": "en",
+      "available": true,
+      "createdAt": "2025-08-30T16:38:26.864Z"
+    },
+    {
+      "id": "cac5",
+      "title": "How to Influence Others and Earn Their Trust",
+      "author": "Ayman Elmassarawy",
+      "isbn": "",
+      "category": "Business & Economics",
+      "publishedYear": "2025",
+      "thumbnail": "http://books.google.com/books/content?id=9Y91EQAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api",
+      "description": "We’ve all felt our voice getting lost in the crowd, even when we had something important to say. In today’s fast-paced, hyperconnected world, genuine human connection is often scarce, and even the most brilliant ideas can fall on deaf ears if you haven’t earned trust. In fact, one eye-opening study found that 58% of people trust a stranger more than their own boss – a stark reminder that real trust is rarer (and more powerful) than eversourceforge.net. But it doesn’t have to be that way. With the right approach, you can become the person others listen to, rely on, and follow. After all, as leadership expert John C. Maxwell famously said, “Leadership is influence, nothing more, nothing less”maxwellleadership.com. Each of us has the potential to lead and uplift others through our influence, regardless of title or status. Yet influence means little without trust – Stephen R. Covey reminded us that “trust is the glue of life”, the essential bond that holds relationships togetherbrainyquote.com. These insights underscore that authentic leadership isn’t about power or position, but about earning trust and building heartfelt connections with people. How to Influence Others and Earn Their Trust is your blueprint for making that transformation. This isn’t about slick manipulation or having a fancy title – it’s about building ethical, lasting influence rooted in authenticity, compassion, and respect. Whether you’re vying to lead a team, hoping to elevate your business relationships, or just wanting closer, more trusting friendships, this book shows you how to turn everyday interactions into opportunities for impact. Inside these pages, you’ll learn how to: · Build lasting influence grounded in ethics, authenticity, and integrity. · Earn deep trust in both personal and professional relationships. · Communicate with empathy and confidence so your message truly resonates. · Lead without a title, inspiring others through your actions and vision. · Transform conflict into trust-building opportunities that foster understanding. · Leave a legacy of positive impact, elevating everyone around you. Packed with inspiring real-world stories, powerful tools, and proven strategies, How to Influence Others and Earn Their Trust bridges the gap between knowing what to do and actually doing it. You’ll meet leaders who won hearts without formal authority, and everyday individuals who transformed their relationships through trust – all serving as examples and inspiration. Each chapter provides practical exercises and relatable examples, so you can immediately put the principles into practice and see results in how people respond to you. By the final page, you won’t just understand how to influence others and earn their trust – you’ll be equipped and empowered to do it, confidently and authentically. Imagine having the kind of influence that sparks positive change at work, at home, in your community – influence built on integrity, empathy, and trust that endures. How to Influence Others and Earn Their Trust will inspire you to step up, communicate boldly, and become the trusted, compassionate leader you were meant to be… no title required. Get ready to unlock your influence, earn unwavering trust, and make the kind of positive impact that others will remember – starting today.",
+      "pageCount": 216,
+      "publisher": "Ayman Elmassarawy",
+      "language": "en",
+      "available": true,
+      "createdAt": "2025-08-30T16:41:34.316Z"
     }
   ],
   "borrows": [
