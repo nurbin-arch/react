@@ -46,7 +46,7 @@ export default function Home() {
                 color: 'var(--color-text-secondary)',
                 lineHeight: '1.6'
               }}>
-                Welcome to React Library — your modern, lightweight library system. 
+                Welcome to BookNest — your modern, lightweight library system. 
                 Browse thousands of titles and keep track of your borrowed books seamlessly.
               </p>
               <div className="btn-group" style={{ gap: 'var(--space-3)' }}>
@@ -123,7 +123,7 @@ export default function Home() {
             marginBottom: 'var(--space-6)',
             fontSize: 'var(--font-size-3xl)'
           }}>
-            Why Choose React Library?
+            Why Choose BookNest?
           </h2>
           <div style={{ 
             display: 'grid',

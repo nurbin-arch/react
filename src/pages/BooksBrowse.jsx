@@ -2,21 +2,17 @@ import { useMemo, useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { useLibrary } from '../contexts/LibraryContext'
 import { formatDate } from '../utils/date'
-import { searchBooks } from '../services/bookApi'
 
 export default function BooksBrowse() {
   const { user } = useAuth()
-  const { books, borrows, borrowBook, calculateFine, addBook } = useLibrary()
+  const { books, borrows, borrowBook, calculateFine } = useLibrary()
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState('')
   const [availability, setAvailability] = useState('')
   const [year, setYear] = useState('')
   const [viewMode, setViewMode] = useState('grid')
   const [borrowing, setBorrowing] = useState(null)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [searchResults, setSearchResults] = useState([])
-  const [isSearching, setIsSearching] = useState(false)
-  const [showSearchResults, setShowSearchResults] = useState(false)
+
 
   // Role-based permissions
   const canBorrow = user?.role === 'student' || user?.role === 'librarian'
@@ -98,50 +94,7 @@ export default function BooksBrowse() {
     return { status: 'available', label: 'Available', class: 'available' }
   }
 
-  const handleGoogleBooksSearch = async () => {
-    if (!searchQuery.trim()) return
-    
-    setIsSearching(true)
-    try {
-      const results = await searchBooks(searchQuery, 10)
-      setSearchResults(results)
-      setShowSearchResults(true)
-    } catch (error) {
-      console.error('Search failed:', error)
-      alert('Failed to search Google Books. Please try again.')
-    } finally {
-      setIsSearching(false)
-    }
-  }
 
-  const handleAddFromGoogleBooks = async (googleBook) => {
-    try {
-      const bookData = {
-        title: googleBook.title,
-        author: googleBook.author,
-        isbn: googleBook.isbn,
-        category: googleBook.category,
-        publishedYear: googleBook.publishedYear,
-        thumbnail: googleBook.thumbnail,
-        description: googleBook.description,
-        pageCount: googleBook.pageCount,
-        publisher: googleBook.publisher,
-        available: true
-      }
-      
-      const result = await addBook(bookData)
-      if (result.ok) {
-        alert(`Successfully added "${googleBook.title}" to the library!`)
-        setShowSearchResults(false)
-        setSearchQuery('')
-      } else {
-        alert(result.error || 'Failed to add book')
-      }
-    } catch (error) {
-      console.error('Add book error:', error)
-      alert('Failed to add book. Please try again.')
-    }
-  }
 
   if (viewMode === 'grid') {
     return (
@@ -152,81 +105,18 @@ export default function BooksBrowse() {
           <p>Discover and borrow from our collection of {books.length} books</p>
         </div>
 
-               {/* Google Books Search (Librarians Only) */}
-       {canAddBooks && (
-         <div className="google-books-search">
-           <h3>🔍 Search & Add Books from Google Books</h3>
-                       <p className="api-status">
-              {import.meta.env.VITE_GOOGLE_BOOKS_API_KEY 
-                ? '✅ Using Google Books API with API key (higher rate limits)' 
-                : '⚠️ Using Google Books API without API key (limited to 100 requests/day)'
-              }
-            </p>
-            <div className="search-controls">
-              <input 
-                placeholder="Search for books on Google Books (title, author, ISBN)..." 
-                value={searchQuery} 
-                onChange={e => setSearchQuery(e.target.value)}
-                className="search-input"
-                onKeyPress={e => e.key === 'Enter' && handleGoogleBooksSearch()}
-              />
-              <button 
-                onClick={handleGoogleBooksSearch}
-                disabled={isSearching || !searchQuery.trim()}
-                className="search-btn"
-              >
-                {isSearching ? 'Searching...' : 'Search Google Books'}
-              </button>
-            </div>
-            
-            {showSearchResults && (
-              <div className="search-results">
-                <div className="results-header">
-                  <h4>Search Results ({searchResults.length} books found)</h4>
-                  <button 
-                    onClick={() => setShowSearchResults(false)}
-                    className="close-btn"
-                  >
-                    ✕
-                  </button>
-                </div>
-                <div className="google-books-grid">
-                  {searchResults.map(book => (
-                    <div key={book.id} className="google-book-card">
-                      <div className="book-cover">
-                        {book.thumbnail ? (
-                          <img src={book.thumbnail} alt={book.title} />
-                        ) : (
-                          <div className="book-placeholder">📚</div>
-                        )}
-                      </div>
-                      <div className="book-info">
-                        <h4>{book.title}</h4>
-                        <p className="book-author">by {book.author}</p>
-                        <p className="book-meta">
-                          {book.category} • {book.publishedYear}
-                          {book.pageCount && ` • ${book.pageCount} pages`}
-                        </p>
-                        {book.description && (
-                          <p className="book-description">
-                            {book.description.length > 100 
-                              ? `${book.description.substring(0, 100)}...` 
-                              : book.description
-                            }
-                          </p>
-                        )}
-                        <button 
-                          onClick={() => handleAddFromGoogleBooks(book)}
-                          className="add-book-btn"
-                        >
-                          ➕ Add to Library
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                       {/* Add Book Section (Librarians Only) */}
+        {canAddBooks && (
+          <div className="add-book-section">
+            <div className="add-book-content">
+              <div className="add-book-info">
+                <h3>📚 Add New Books</h3>
+                <p>Use Google Books API to search and add books to BookNest, or enter details manually</p>
               </div>
-            )}
+              <a href="/add-book" className="btn-add-book">
+                ➕ Add New Book
+              </a>
+            </div>
           </div>
         )}
 
@@ -363,77 +253,20 @@ export default function BooksBrowse() {
         <p>Discover and borrow from our collection of {books.length} books</p>
       </div>
 
-      {/* Google Books Search (Librarians Only) */}
-      {canAddBooks && (
-        <div className="google-books-search">
-          <h3>🔍 Search & Add Books from Google Books</h3>
-          <div className="search-controls">
-            <input 
-              placeholder="Search for books on Google Books (title, author, ISBN)..." 
-              value={searchQuery} 
-              onChange={e => setSearchQuery(e.target.value)}
-              className="search-input"
-              onKeyPress={e => e.key === 'Enter' && handleGoogleBooksSearch()}
-            />
-            <button 
-              onClick={handleGoogleBooksSearch}
-              disabled={isSearching || !searchQuery.trim()}
-              className="search-btn"
-            >
-              {isSearching ? 'Searching...' : 'Search Google Books'}
-            </button>
-          </div>
-          
-          {showSearchResults && (
-            <div className="search-results">
-              <div className="results-header">
-                <h4>Search Results ({searchResults.length} books found)</h4>
-                <button 
-                  onClick={() => setShowSearchResults(false)}
-                  className="close-btn"
-                >
-                  ✕
-                </button>
-              </div>
-              <div className="google-books-grid">
-                {searchResults.map(book => (
-                  <div key={book.id} className="google-book-card">
-                    <div className="book-cover">
-                      {book.thumbnail ? (
-                        <img src={book.thumbnail} alt={book.title} />
-                      ) : (
-                        <div className="book-placeholder">📚</div>
-                      )}
-                    </div>
-                    <div className="book-info">
-                      <h4>{book.title}</h4>
-                      <p className="book-author">by {book.author}</p>
-                      <p className="book-meta">
-                        {book.category} • {book.publishedYear}
-                        {book.pageCount && ` • ${book.pageCount} pages`}
-                      </p>
-                      {book.description && (
-                        <p className="book-description">
-                          {book.description.length > 100 
-                            ? `${book.description.substring(0, 100)}...` 
-                            : book.description
-                          }
-                        </p>
-                      )}
-                      <button 
-                        onClick={() => handleAddFromGoogleBooks(book)}
-                        className="add-book-btn"
-                      >
-                        ➕ Add to Library
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
+             {/* Add Book Section (Librarians Only) */}
+       {canAddBooks && (
+         <div className="add-book-section">
+           <div className="add-book-content">
+             <div className="add-book-info">
+               <h3>📚 Add New Books</h3>
+               <p>Use Google Books API to search and add books, or enter details manually</p>
+             </div>
+             <a href="/add-book" className="btn-add-book">
+               ➕ Add New Book
+             </a>
+           </div>
+         </div>
+       )}
 
       <div className="browse-filters">
         <div className="search-bar">

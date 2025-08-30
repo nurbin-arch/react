@@ -239,10 +239,14 @@ export default function BookForm({ initial = null, onSubmit, onCancel }) {
       </div>
 
       {/* Actions */}
-      <div className="form-actions">
-        <button type="submit" className="btn-primary">Save Book</button>
+      <div className="form-actions" style={{ display: 'flex', gap: 16, marginTop: 24 }}>
+        <button type="submit" className="btn btn-success btn-large" style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontSize: '1.3rem' }}>💾</span> Save Book
+        </button>
         {onCancel && (
-          <button type="button" onClick={onCancel} className="btn-secondary">Cancel</button>
+          <button type="button" onClick={onCancel} className="btn btn-secondary btn-large" style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: '1.3rem' }}>✖️</span> Cancel
+          </button>
         )}
       </div>
     </form>

@@ -48,7 +48,7 @@ export default function SignupUser() {
         }}>
           <span style={{ fontSize: '24px', marginBottom: 'var(--space-2)', display: 'block' }}>🎓</span>
           <p style={{ margin: 0, color: 'var(--color-text)' }}>
-            Join our library community as a student and start exploring books!
+            Join our BookNest community as a student and start exploring books!
           </p>
         </div>
         

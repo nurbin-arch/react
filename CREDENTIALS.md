@@ -1,6 +1,6 @@
-# Library Management System - Test Credentials
+# BookNest Library Management System - Test Credentials
 
-This document contains the static login credentials for testing the Library Management System.
+This document contains the static login credentials for testing the BookNest Library Management System.
 
 ## Student Accounts
 
@@ -39,8 +39,8 @@ This document contains the static login credentials for testing the Library Mana
 
 ### Librarian Features
 - All student features
-- Add new books to the library
-- Remove books from the library
+- Add new books to BookNest
+- Remove books from BookNest
 - Edit book information
 - Manage all borrowings
 - View all users' borrowing history

@@ -121,7 +121,7 @@ export default function StudentDashboard() {
           </a>
         </div>
         <p style={{ color: 'var(--color-muted)', marginBottom: '20px' }}>
-          Discover our collection and borrow books instantly. Click "Browse All Books" to explore the full library.
+          Discover our collection and borrow books instantly. Click "Browse All Books" to explore the full BookNest.
         </p>
       </section>
 

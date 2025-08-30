@@ -1,6 +1,6 @@
 # Google Books API Integration Setup
 
-This library system now includes automatic book information fetching from Google Books API and Open Library API.
+BookNest now includes automatic book information fetching from Google Books API and Open Library API.
 
 ## Features
 

@@ -48,7 +48,7 @@ export default function SignupAdmin() {
         }}>
           <span style={{ fontSize: '24px', marginBottom: 'var(--space-2)', display: 'block' }}>📚</span>
           <p style={{ margin: 0, color: 'var(--color-text)' }}>
-            Join our library team as a librarian and help manage our collection!
+            Join our BookNest team as a librarian and help manage our collection!
           </p>
         </div>
         

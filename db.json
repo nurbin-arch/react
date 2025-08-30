@@ -77,6 +77,13 @@
       "password": "dgffgfddsdrdd",
       "role": "librarian",
       "createdAt": "2025-08-30T09:36:11.224Z"
+    },
+    {
+      "id": "7b95",
+      "email": "test@example.com",
+      "password": "test123",
+      "role": "student",
+      "name": "Test User"
     }
   ],
   "books": [

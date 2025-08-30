@@ -1,4 +1,4 @@
-# React Library Management System
+# BookNest Library Management System
 
 A modern library management system built with React, featuring Google Books API integration and a local JSON database.
 
@@ -32,7 +32,7 @@ A modern library management system built with React, featuring Google Books API 
 1. **Clone the repository**
    ```bash
    git clone <repository-url>
-   cd react-library
+   cd booknest
    ```
 
 2. **Install dependencies**

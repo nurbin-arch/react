@@ -18,7 +18,7 @@ export default function NavBar() {
         <div className="brand">
           <Link to={user ? (user.role === 'librarian' ? '/librarian' : '/student') : '/'}>
             <span style={{ fontSize: '24px', marginRight: 'var(--space-2)' }}>📚</span>
-            React Library
+            BookNest
           </Link>
         </div>
         <div className="spacer" />
