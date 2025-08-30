@@ -1,0 +1,231 @@
+{
+  "users": [
+    {
+      "id": "1",
+      "email": "student1@library.com",
+      "password": "student123",
+      "role": "student",
+      "name": "John Student",
+      "createdAt": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "2",
+      "email": "student2@library.com",
+      "password": "student456",
+      "role": "student",
+      "name": "Jane Student",
+      "createdAt": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "3",
+      "email": "alice@university.edu",
+      "password": "alice2024",
+      "role": "student",
+      "name": "Alice Johnson",
+      "createdAt": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "4",
+      "email": "bob@university.edu",
+      "password": "bob2024",
+      "role": "student",
+      "name": "Bob Smith",
+      "createdAt": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "5",
+      "email": "librarian@library.com",
+      "password": "librarian123",
+      "role": "librarian",
+      "name": "Sarah Librarian",
+      "createdAt": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "6",
+      "email": "admin@library.com",
+      "password": "admin456",
+      "role": "librarian",
+      "name": "Admin User",
+      "createdAt": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "7",
+      "email": "lib.mary@library.com",
+      "password": "mary2024",
+      "role": "librarian",
+      "name": "Mary Wilson",
+      "createdAt": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "8",
+      "email": "lib.james@library.com",
+      "password": "james2024",
+      "role": "librarian",
+      "name": "James Brown",
+      "createdAt": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "b47d",
+      "email": "student@gmail.com",
+      "password": "student123",
+      "role": "student",
+      "createdAt": "2025-08-30T09:20:37.314Z"
+    },
+    {
+      "id": "c020",
+      "email": "seller@site.com",
+      "password": "dgffgfddsdrdd",
+      "role": "librarian",
+      "createdAt": "2025-08-30T09:36:11.224Z"
+    }
+  ],
+  "books": [
+    {
+      "available": true,
+      "id": "1"
+    },
+    {
+      "available": true,
+      "id": "2"
+    },
+    {
+      "id": "3",
+      "title": "1984",
+      "author": "George Orwell",
+      "isbn": "9780451524935",
+      "category": "Fiction",
+      "publishedYear": "1949",
+      "thumbnail": "https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=400&q=80&auto=format&fit=crop",
+      "description": "A dystopian novel about totalitarianism and surveillance society.",
+      "pageCount": 328,
+      "publisher": "Signet Classic",
+      "language": "English",
+      "available": true,
+      "createdAt": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "available": true,
+      "id": "4"
+    },
+    {
+      "id": "5",
+      "title": "The Hobbit",
+      "author": "J.R.R. Tolkien",
+      "isbn": "9780547928241",
+      "category": "Fantasy",
+      "publishedYear": "1937",
+      "thumbnail": "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=400&q=80&auto=format&fit=crop",
+      "description": "A fantasy novel about the adventures of Bilbo Baggins, a hobbit who embarks on a quest.",
+      "pageCount": 366,
+      "publisher": "Houghton Mifflin Harcourt",
+      "language": "English",
+      "available": true,
+      "createdAt": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "6",
+      "title": "The Catcher in the Rye",
+      "author": "J.D. Salinger",
+      "isbn": "9780316769488",
+      "category": "Fiction",
+      "publishedYear": "1951",
+      "thumbnail": "https://images.unsplash.com/photo-1471107340929-a87cd0f5b5f3?w=400&q=80&auto=format&fit=crop",
+      "description": "A novel about teenage alienation and loss of innocence in post-World War II America.",
+      "pageCount": 277,
+      "publisher": "Little, Brown and Company",
+      "language": "English",
+      "available": true,
+      "createdAt": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "available": true,
+      "id": "7"
+    },
+    {
+      "available": true,
+      "id": "8"
+    }
+  ],
+  "borrows": [
+    {
+      "id": "1",
+      "bookId": 1,
+      "userId": 1,
+      "borrowDate": "2024-01-15T00:00:00.000Z",
+      "dueDate": "2024-02-15T00:00:00.000Z",
+      "returnDate": null,
+      "status": "borrowed",
+      "createdAt": "2024-01-15T00:00:00.000Z"
+    },
+    {
+      "id": "2",
+      "bookId": 3,
+      "userId": 2,
+      "borrowDate": "2024-01-10T00:00:00.000Z",
+      "dueDate": "2024-02-10T00:00:00.000Z",
+      "returnDate": "2024-01-25T00:00:00.000Z",
+      "status": "returned",
+      "createdAt": "2024-01-10T00:00:00.000Z"
+    },
+    {
+      "id": "2b75",
+      "bookId": "8",
+      "userId": "b47d",
+      "borrowDate": "2025-08-30T09:20:51.814Z",
+      "dueDate": "2025-09-13T09:20:51.814Z",
+      "status": "returned",
+      "createdAt": "2025-08-30T09:20:51.814Z",
+      "returnDate": "2025-08-30T09:23:31.754Z"
+    },
+    {
+      "id": "ef63",
+      "bookId": "2",
+      "userId": "b47d",
+      "borrowDate": "2025-08-30T09:23:27.513Z",
+      "dueDate": "2025-09-14T09:23:27.513Z",
+      "status": "returned",
+      "createdAt": "2025-08-30T09:23:27.513Z",
+      "returnDate": "2025-08-30T09:23:33.280Z"
+    },
+    {
+      "id": "2a58",
+      "bookId": "8",
+      "userId": "b47d",
+      "borrowDate": "2025-08-30T09:23:39.747Z",
+      "dueDate": "2025-09-13T09:23:39.747Z",
+      "status": "returned",
+      "createdAt": "2025-08-30T09:23:39.747Z",
+      "returnDate": "2025-08-30T09:29:21.685Z"
+    },
+    {
+      "id": "0ca1",
+      "bookId": "7",
+      "userId": "b47d",
+      "borrowDate": "2025-08-30T09:23:46.733Z",
+      "dueDate": "2025-09-13T09:23:46.733Z",
+      "status": "returned",
+      "createdAt": "2025-08-30T09:23:46.733Z",
+      "returnDate": "2025-08-30T09:29:23.474Z"
+    },
+    {
+      "id": "eb7b",
+      "bookId": "4",
+      "userId": "b47d",
+      "borrowDate": "2025-08-30T09:24:15.142Z",
+      "dueDate": "2025-08-31T09:24:15.142Z",
+      "status": "returned",
+      "createdAt": "2025-08-30T09:24:15.142Z",
+      "returnDate": "2025-08-30T09:29:24.969Z"
+    },
+    {
+      "id": "8214",
+      "bookId": "1",
+      "userId": "b47d",
+      "borrowDate": "2025-08-30T09:29:39.280Z",
+      "dueDate": "2025-09-13T09:29:39.280Z",
+      "status": "returned",
+      "createdAt": "2025-08-30T09:29:39.280Z",
+      "returnDate": "2025-08-30T09:30:01.217Z"
+    }
+  ]
+}

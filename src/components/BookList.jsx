@@ -16,6 +16,8 @@ export default function BookList({ onEdit, onDelete, onBorrow, showActions = tru
   const canDelete = user?.role === 'librarian'
   const canBorrow = user?.role === 'student' || user?.role === 'librarian'
 
+
+
   const filtered = useMemo(() => {
     return books.filter(b => {
       const matchesQuery = [b.title, b.author, b.isbn, b.category]
@@ -92,12 +94,18 @@ export default function BookList({ onEdit, onDelete, onBorrow, showActions = tru
                 <h4>{book.title}</h4>
                 <p className="book-author">by {book.author}</p>
                 <p className="book-meta">{book.category} • {book.publishedYear}</p>
-                {showActions && (
+                                {showActions && (
                   <div className="book-actions">
-                    {canBorrow && onBorrow && book.available && (
+                    {canBorrow && onBorrow && book.available ? (
                       <button onClick={() => onBorrow(book)} className="btn-small">
                         Borrow
                       </button>
+                    ) : (
+                      <div style={{ fontSize: '12px', color: 'var(--color-muted)' }}>
+                        {!canBorrow && 'Cannot borrow'}
+                        {!onBorrow && 'No borrow function'}
+                        {!book.available && 'Not available'}
+                      </div>
                     )}
                     {canEdit && onEdit && (
                       <button onClick={() => onEdit(book)} className="btn-small">

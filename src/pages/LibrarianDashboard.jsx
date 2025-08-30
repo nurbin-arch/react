@@ -56,7 +56,7 @@ export default function LibrarianDashboard() {
     })
   }, [books, searchQuery, filterCategory, filterStatus])
 
-  const overdueBorrows = borrows.filter(br => !br.returnedAt && calculateFine(br) > 0)
+  const overdueBorrows = borrows.filter(br => br.status === 'borrowed' && calculateFine(br) > 0)
   const totalBooks = books.length
   const borrowedBooks = books.filter(b => !b.available).length
   const availableBooks = totalBooks - borrowedBooks

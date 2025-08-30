@@ -5,6 +5,7 @@ import SignupUser from './pages/SignupUser.jsx'
 import SignupAdmin from './pages/SignupAdmin.jsx'
 import LibrarianDashboard from './pages/LibrarianDashboard.jsx'
 import StudentDashboard from './pages/StudentDashboard.jsx'
+import BooksBrowse from './pages/BooksBrowse.jsx'
 import { useAuth } from './contexts/AuthContext.jsx'
 import Layout from './components/Layout.jsx'
 import Home from './pages/Home.jsx'
@@ -38,6 +39,14 @@ function App() {
           element={
             <ProtectedRoute allow={["student", "librarian"]}>
               <StudentDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/books"
+          element={
+            <ProtectedRoute allow={["student", "librarian"]}>
+              <BooksBrowse />
             </ProtectedRoute>
           }
         />

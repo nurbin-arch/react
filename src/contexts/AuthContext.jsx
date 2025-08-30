@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { useLocalStorage } from '../hooks/useLocalStorage'
+import { authAPI } from '../services/api'
 
 const AuthContext = createContext(null)
 
@@ -12,14 +13,29 @@ export function AuthProvider({ children }) {
   }, [user, setStoredUser])
 
   const login = async ({ email, password }) => {
-    const role = email?.includes('lib') ? 'librarian' : 'student'
-    setUser({ id: email, email, role })
-    return { ok: true }
+    try {
+      const result = await authAPI.login(email, password)
+      if (result.ok) {
+        setUser(result.user)
+      }
+      return result
+    } catch (error) {
+      console.error('Login error:', error)
+      return { ok: false, error: 'Login failed. Please try again.' }
+    }
   }
 
   const signup = async ({ email, password, role }) => {
-    setUser({ id: email, email, role: role || 'student' })
-    return { ok: true }
+    try {
+      const result = await authAPI.signup({ email, password, role })
+      if (result.ok) {
+        setUser(result.user)
+      }
+      return result
+    } catch (error) {
+      console.error('Signup error:', error)
+      return { ok: false, error: 'Signup failed. Please try again.' }
+    }
   }
 
   const logout = () => setUser(null)

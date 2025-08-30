@@ -16,23 +16,64 @@ export default function NavBar() {
     <nav className="navbar">
       <div className="navbar-inner">
         <div className="brand">
-          <Link to={user ? (user.role === 'librarian' ? '/librarian' : '/student') : '/'}>📚 React Library</Link>
+          <Link to={user ? (user.role === 'librarian' ? '/librarian' : '/student') : '/'}>
+            <span style={{ fontSize: '24px', marginRight: 'var(--space-2)' }}>📚</span>
+            React Library
+          </Link>
         </div>
         <div className="spacer" />
         <ul className="nav-links">
           {!user && (
             <>
-              <li><NavLink to="/login">Login</NavLink></li>
-              <li><NavLink to="/signup/user">Student signup</NavLink></li>
-              <li><NavLink to="/signup/admin">Librarian signup</NavLink></li>
+              <li><NavLink to="/login" className="btn btn-secondary btn-small">Login</NavLink></li>
+              <li><NavLink to="/signup/user" className="btn btn-secondary btn-small">Student Signup</NavLink></li>
+              <li><NavLink to="/signup/admin" className="btn btn-secondary btn-small">Librarian Signup</NavLink></li>
             </>
           )}
           {user && (
             <>
               {user.role === 'librarian' ? <AdminNav /> : <UserNav />}
-              <li className="user-email" title={user.email}>{user.email}</li>
+              <li style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: 'var(--space-2)',
+                padding: 'var(--space-2) var(--space-3)',
+                background: 'rgba(255, 255, 255, 0.05)',
+                borderRadius: 'var(--radius-md)',
+                border: '1px solid rgba(255, 255, 255, 0.1)'
+              }}>
+                <span style={{ 
+                  fontSize: '16px',
+                  color: user.role === 'librarian' ? 'var(--color-primary)' : 'var(--color-success)'
+                }}>
+                  {user.role === 'librarian' ? '📚' : '🎓'}
+                </span>
+                <div style={{ textAlign: 'left' }}>
+                  <div style={{ 
+                    fontSize: 'var(--font-size-sm)', 
+                    fontWeight: '600',
+                    color: 'var(--color-text)'
+                  }}>
+                    {user.name || user.email}
+                  </div>
+                  <div style={{ 
+                    fontSize: 'var(--font-size-xs)', 
+                    color: 'var(--color-muted)',
+                    textTransform: 'capitalize'
+                  }}>
+                    {user.role}
+                  </div>
+                </div>
+              </li>
               <li>
-                <button className="btn-small" onClick={handleLogout}>Logout</button>
+                <button 
+                  className="btn btn-danger btn-small" 
+                  onClick={handleLogout}
+                  style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-1)' }}
+                >
+                  <span>🚪</span>
+                  Logout
+                </button>
               </li>
             </>
           )}

@@ -1,24 +1,22 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { useLibrary } from '../contexts/LibraryContext'
-import BookList from '../components/BookList'
-import BorrowForm from '../components/BorrowForm'
 import { formatDate } from '../utils/date'
 
 export default function StudentDashboard() {
   const { user, logout } = useAuth()
-  const { books, borrows, borrowBook, returnBook, calculateFine } = useLibrary()
-  const [selected, setSelected] = useState(null)
-  const [showBorrow, setShowBorrow] = useState(false)
+  const { books, borrows, returnBook, calculateFine } = useLibrary()
 
-  const myBorrows = useMemo(() => borrows.filter(br => br.userId === user.id), [borrows, user.id])
+  const myBorrows = useMemo(() => {
+    return borrows.filter(br => br.userId === user.id)
+  }, [borrows, user.id])
 
   // Personal analytics
   const personalStats = useMemo(() => {
     const totalBorrowed = myBorrows.length
-    const currentlyBorrowed = myBorrows.filter(br => !br.returnedAt).length
-    const returned = myBorrows.filter(br => br.returnedAt).length
-    const overdue = myBorrows.filter(br => !br.returnedAt && calculateFine(br) > 0).length
+    const currentlyBorrowed = myBorrows.filter(br => br.status === 'borrowed').length
+    const returned = myBorrows.filter(br => br.status === 'returned').length
+    const overdue = myBorrows.filter(br => br.status === 'borrowed' && calculateFine(br) > 0).length
     const totalFines = myBorrows.reduce((sum, br) => sum + calculateFine(br), 0)
     
     // Reading preferences
@@ -42,23 +40,22 @@ export default function StudentDashboard() {
     }
   }, [myBorrows, books, calculateFine])
 
-  const startBorrow = book => {
-    setSelected(book)
-    setShowBorrow(true)
-  }
 
-  const confirmBorrow = async days => {
-    await borrowBook({ bookId: selected.id, userId: user.id, days })
-    setShowBorrow(false)
-    setSelected(null)
-  }
 
   const handleReturn = async (borrowId) => {
-    await returnBook({ borrowId })
+    try {
+      const result = await returnBook({ borrowId })
+      if (!result.ok) {
+        alert(result.error || 'Failed to return book')
+      }
+    } catch (error) {
+      console.error('Return error:', error)
+      alert('Failed to return book. Please try again.')
+    }
   }
 
   const getBorrowStatus = (borrow) => {
-    if (borrow.returnedAt) return { status: 'returned', label: 'Returned', class: 'returned' }
+    if (borrow.status === 'returned') return { status: 'returned', label: 'Returned', class: 'returned' }
     
     const now = new Date()
     const due = new Date(borrow.dueDate)
@@ -117,11 +114,15 @@ export default function StudentDashboard() {
       </div>
 
       <section id="browse">
-        <h3>Browse Books</h3>
-        <BookList onBorrow={startBorrow} showActions />
-        {showBorrow && (
-          <BorrowForm onSubmit={confirmBorrow} onCancel={() => setShowBorrow(false)} />
-        )}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+          <h3>Browse Books</h3>
+          <a href="/books" className="btn btn-primary">
+            Browse All Books
+          </a>
+        </div>
+        <p style={{ color: 'var(--color-muted)', marginBottom: '20px' }}>
+          Discover our collection and borrow books instantly. Click "Browse All Books" to explore the full library.
+        </p>
       </section>
 
       <section id="my-borrows">
@@ -152,7 +153,7 @@ export default function StudentDashboard() {
                     <h4>{book?.title || 'Unknown Book'}</h4>
                     <p className="book-author">by {book?.author || 'Unknown Author'}</p>
                     <p className="borrow-meta">
-                      <strong>Borrowed:</strong> {formatDate(br.borrowedAt)}<br />
+                      <strong>Borrowed:</strong> {formatDate(br.borrowDate)}<br />
                       <strong>Due:</strong> {formatDate(br.dueDate)}<br />
                       {borrowStatus.fine && (
                         <strong style={{ color: 'var(--color-danger)' }}>
@@ -161,7 +162,7 @@ export default function StudentDashboard() {
                       )}
                     </p>
                     <div className="borrow-actions">
-                      {!br.returnedAt ? (
+                      {br.status === 'borrowed' ? (
                         <button 
                           onClick={() => handleReturn(br.id)}
                           className="btn-small"
@@ -169,7 +170,7 @@ export default function StudentDashboard() {
                           Return Book
                         </button>
                       ) : (
-                        <span className="returned-badge">Returned on {formatDate(br.returnedAt)}</span>
+                        <span className="returned-badge">Returned on {formatDate(br.returnDate)}</span>
                       )}
                     </div>
                   </div>

@@ -9,12 +9,12 @@ function Badge({ children }) {
 export default function UserNav() {
   const { borrows } = useLibrary()
   const { user } = useAuth()
-  const myCount = borrows.filter(b => b.userId === user?.id && !b.returnedAt).length
+  const myCount = borrows.filter(b => b.userId === user?.id && b.status === 'borrowed').length
   return (
     <>
       <li><NavLink to="/student">Dashboard</NavLink></li>
-      <li><a href="#browse">Browse</a></li>
-      <li><a href="#my-borrows">My Borrows <Badge>{myCount}</Badge></a></li>
+      <li><NavLink to="/books">Browse Books</NavLink></li>
+      <li><NavLink to="/student#my-borrows">My Borrows <Badge>{myCount}</Badge></NavLink></li>
     </>
   )
 }
