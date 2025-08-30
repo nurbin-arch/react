@@ -104,19 +104,8 @@
       "id": "4"
     },
     {
-      "id": "5",
-      "title": "The Hobbit",
-      "author": "J.R.R. Tolkien",
-      "isbn": "9780547928241",
-      "category": "Fantasy",
-      "publishedYear": "1937",
-      "thumbnail": "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=400&q=80&auto=format&fit=crop",
-      "description": "A fantasy novel about the adventures of Bilbo Baggins, a hobbit who embarks on a quest.",
-      "pageCount": 366,
-      "publisher": "Houghton Mifflin Harcourt",
-      "language": "English",
       "available": true,
-      "createdAt": "2024-01-01T00:00:00.000Z"
+      "id": "5"
     },
     {
       "id": "6",
@@ -243,8 +232,9 @@
       "userId": "1",
       "borrowDate": "2024-01-20T00:00:00.000Z",
       "dueDate": "2024-01-23T00:00:00.000Z",
-      "status": "borrowed",
-      "createdAt": "2024-01-20T00:00:00.000Z"
+      "status": "returned",
+      "createdAt": "2024-01-20T00:00:00.000Z",
+      "returnDate": "2025-08-30T16:12:36.245Z"
     },
     {
       "id": "d0e5",
