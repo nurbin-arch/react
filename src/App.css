@@ -271,6 +271,8 @@ main {
   box-shadow: var(--shadow-md);
   position: relative;
   overflow: hidden;
+  min-width: fit-content;
+  width: auto;
 }
 
 .view-toggle::before {
@@ -431,7 +433,6 @@ main {
 }
 
 .borrow-btn {
-  flex: 1;
   padding: var(--space-3) var(--space-4);
   background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
   border: none;
@@ -444,6 +445,8 @@ main {
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
+  min-width: fit-content;
+  width: auto;
 }
 
 .borrow-btn:hover:not(:disabled) {
@@ -545,6 +548,8 @@ main {
   font-size: var(--font-size-sm);
   cursor: pointer;
   transition: all 0.2s ease;
+  min-width: fit-content;
+  width: auto;
 }
 
 .borrow-btn-small:hover:not(:disabled) {
@@ -931,7 +936,8 @@ main {
   box-shadow: var(--shadow-md);
   position: relative;
   overflow: hidden;
-  min-width: 140px;
+  min-width: fit-content;
+  width: auto;
   justify-content: center;
 }
 
@@ -1219,6 +1225,8 @@ main {
   align-items: center;
   gap: var(--space-2);
   box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
+  min-width: fit-content;
+  width: auto;
 }
 
 .btn-submit:hover:not(:disabled) {
@@ -1242,6 +1250,8 @@ main {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+  min-width: fit-content;
+  width: auto;
 }
 
 .btn-cancel:hover {
@@ -1292,6 +1302,8 @@ main {
   gap: var(--space-2);
   box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
   white-space: nowrap;
+  min-width: fit-content;
+  width: auto;
 }
 
 .btn-add-book:hover {
@@ -1301,7 +1313,6 @@ main {
 
 /* Enhanced Borrow Button */
 .borrow-btn {
-  flex: 1;
   padding: var(--space-3) var(--space-4);
   background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
   border: none;
@@ -1315,6 +1326,8 @@ main {
   justify-content: center;
   gap: var(--space-2);
   box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+  min-width: fit-content;
+  width: auto;
 }
 
 .borrow-btn:hover:not(:disabled) {
@@ -1344,6 +1357,8 @@ main {
   transition: all 0.3s ease;
   font-weight: 600;
   box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+  min-width: fit-content;
+  width: auto;
 }
 
 .view-toggle:hover {
@@ -1363,6 +1378,8 @@ main {
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+  min-width: fit-content;
+  width: auto;
 }
 
 .borrow-btn-small:hover:not(:disabled) {
